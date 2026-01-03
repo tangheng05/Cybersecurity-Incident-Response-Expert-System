@@ -1,0 +1,88 @@
+{% extends "layouts/base.html" %} {% block title %}Create Attack Type -
+Cybersecurity Expert System{% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">
+          <h3>Create New Attack Type</h3>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('attack_type.create') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.name.label(class="form-label") }} {{
+              form.name(class="form-control" + (" is-invalid" if
+              form.name.errors else "")) }} {% if form.name.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.name.errors %} {{ error }} {% endfor %}
+              </div>
+              {% endif %}
+              <small class="form-text text-muted"
+                >e.g., Brute Force, DDoS, SQL Injection</small
+              >
+            </div>
+
+            <div class="mb-3">
+              {{ form.description.label(class="form-label") }} {{
+              form.description(class="form-control" + (" is-invalid" if
+              form.description.errors else ""), rows=4) }} {% if
+              form.description.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.description.errors %} {{ error }} {% endfor
+                %}
+              </div>
+              {% endif %}
+              <small class="form-text text-muted"
+                >Describe the attack type and its characteristics</small
+              >
+            </div>
+
+            <div class="mb-3">
+              {{ form.severity_level.label(class="form-label") }} {{
+              form.severity_level(class="form-control" + (" is-invalid" if
+              form.severity_level.errors else ""), min=1, max=10) }} {% if
+              form.severity_level.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.severity_level.errors %} {{ error }} {%
+                endfor %}
+              </div>
+              {% endif %}
+              <small class="form-text text-muted"
+                >Rate from 1 (low) to 10 (critical)</small
+              >
+            </div>
+
+            <div class="mb-3 form-check">
+              {{ form.is_active(class="form-check-input") }} {{
+              form.is_active.label(class="form-check-label") }}
+              <small class="form-text text-muted d-block"
+                >Inactive attack types won't be used in analysis</small
+              >
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a
+                href="{{ url_for('attack_type.index') }}"
+                class="btn btn-secondary"
+              >
+                <i class="bi bi-x-circle"></i> Cancel
+              </a>
+              {{ form.submit(class="btn btn-primary") }}
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="alert alert-info mt-4">
+        <h5><i class="bi bi-info-circle"></i> RBAC Note:</h5>
+        <p class="mb-0">
+          As a <strong>Security Analyst</strong>, you can create and edit attack
+          types to build the knowledge base for incident detection.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

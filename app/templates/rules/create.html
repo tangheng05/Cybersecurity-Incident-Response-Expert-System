@@ -1,0 +1,107 @@
+{% extends "layouts/base.html" %} {% block title %}Create Rule{% endblock %} {%
+block content %}
+<h1 class="h3 mb-4">Create New Security Rule</h1>
+
+<div class="card shadow-sm">
+  <div class="card-body">
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="mb-3">
+            {{ form.name.label(class="form-label") }} {{
+            form.name(class="form-control" + (" is-invalid" if form.name.errors
+            else "")) }} {% if form.name.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.name.errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            {{ form.attack_type_id.label(class="form-label") }} {{
+            form.attack_type_id(class="form-select" + (" is-invalid" if
+            form.attack_type_id.errors else "")) }} {% if
+            form.attack_type_id.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.attack_type_id.errors %}{{ error }}{% endfor
+              %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.conditions.label(class="form-label") }} {{
+        form.conditions(class="form-control font-monospace" + (" is-invalid" if
+        form.conditions.errors else "")) }} {% if form.conditions.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.conditions.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+        <small class="form-text text-muted"
+          >Define conditions as JSON object</small
+        >
+      </div>
+
+      <div class="mb-3">
+        {{ form.actions.label(class="form-label") }} {{
+        form.actions(class="form-control font-monospace" + (" is-invalid" if
+        form.actions.errors else "")) }} {% if form.actions.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.actions.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+        <small class="form-text text-muted"
+          >Define actions as JSON array of strings</small
+        >
+      </div>
+
+      <div class="row">
+        <div class="col-md-4">
+          <div class="mb-3">
+            {{ form.priority.label(class="form-label") }} {{
+            form.priority(class="form-select" + (" is-invalid" if
+            form.priority.errors else "")) }} {% if form.priority.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.priority.errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3">
+            {{ form.severity_score.label(class="form-label") }} {{
+            form.severity_score(class="form-control" + (" is-invalid" if
+            form.severity_score.errors else "")) }} {% if
+            form.severity_score.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.severity_score.errors %}{{ error }}{% endfor
+              %}
+            </div>
+            {% endif %}
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="mb-3 mt-4">
+            <div class="form-check">
+              {{ form.is_active(class="form-check-input") }} {{
+              form.is_active.label(class="form-check-label") }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-4">
+        {{ form.submit(class="btn btn-primary") }}
+        <a href="{{ url_for('rules.index') }}" class="btn btn-outline-secondary"
+          >Cancel</a
+        >
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

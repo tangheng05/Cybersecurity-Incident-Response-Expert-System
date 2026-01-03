@@ -1,0 +1,96 @@
+{% extends "layouts/base.html" %} {% block title %}Dashboard{% endblock %} {%
+block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3">Security Dashboard</h1>
+  <div>
+    <span class="badge bg-info me-2">Role: {{ session.role }}</span>
+    <span class="me-2">{{ session.username }}</span>
+    <a href="{{ url_for('auth.logout') }}" class="btn btn-sm btn-outline-danger"
+      >Logout</a
+    >
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-3">
+    <div class="card text-white bg-danger mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Active Incidents</h5>
+        <p class="card-text display-4">0</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-warning mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Pending Alerts</h5>
+        <p class="card-text display-4">0</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-success mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Resolved Today</h5>
+        <p class="card-text display-4">0</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card text-white bg-info mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Active Rules</h5>
+        <p class="card-text display-4">0</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">Quick Actions</h5>
+      </div>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <a
+              href="{{ url_for('users.index') }}"
+              class="btn btn-outline-primary btn-lg w-100"
+            >
+              👥 Manage Users
+            </a>
+          </div>
+          <div class="col-md-4 mb-3">
+            <a
+              href="{{ url_for('rules.index') }}"
+              class="btn btn-outline-success btn-lg w-100"
+            >
+              📋 Security Rules
+            </a>
+          </div>
+          <div class="col-md-4 mb-3">
+            <button class="btn btn-outline-secondary btn-lg w-100" disabled>
+              🚨 View Alerts (Coming Soon)
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-4">
+  <div class="col-md-12">
+    <div class="alert alert-success">
+      <h5 class="alert-heading">✨ Milestone 2 Ready!</h5>
+      <p class="mb-0">
+        <strong>Knowledge Base Development:</strong> Rule management system is
+        now available! Create and manage if-then rules for Brute Force and DDoS
+        attack detection.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

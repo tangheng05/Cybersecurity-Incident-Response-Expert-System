@@ -1,0 +1,174 @@
+{% extends "layouts/base.html" %} {% block title %}Alert #{{ alert.id }} -
+Details{% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-shield-exclamation"></i> Alert #{{ alert.id }}</h2>
+    <div>
+      <a href="{{ url_for('alerts.index') }}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Back to List
+      </a>
+      {% if session.user_role in ['admin', 'analyst'] %}
+      <form
+        method="POST"
+        action="{{ url_for('alerts.analyze', alert_id=alert.id) }}"
+        style="display: inline"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button type="submit" class="btn btn-warning">
+          <i class="bi bi-arrow-repeat"></i> Re-Analyze
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- Alert Details Card -->
+    <div class="col-md-6 mb-4">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5><i class="bi bi-info-circle"></i> Alert Information</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-sm">
+            <tr>
+              <th width="40%">Timestamp:</th>
+              <td>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+            </tr>
+            <tr>
+              <th>Source IP:</th>
+              <td><code>{{ alert.source_ip }}</code></td>
+            </tr>
+            <tr>
+              <th>Destination IP:</th>
+              <td><code>{{ alert.destination_ip or 'N/A' }}</code></td>
+            </tr>
+            <tr>
+              <th>Alert Type:</th>
+              <td>{{ alert.alert_type }}</td>
+            </tr>
+            <tr>
+              <th>Severity:</th>
+              <td>
+                <span
+                  class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}secondary{% endif %}"
+                >
+                  {{ alert.severity.upper() }}
+                </span>
+              </td>
+            </tr>
+            <tr>
+              <th>Status:</th>
+              <td>
+                <span
+                  class="badge bg-{% if alert.status == 'new' %}primary{% elif alert.status == 'processed' %}success{% else %}secondary{% endif %}"
+                >
+                  {{ alert.status.upper() }}
+                </span>
+              </td>
+            </tr>
+          </table>
+
+          <h6 class="mt-3">Raw Alert Data:</h6>
+          <pre
+            class="bg-light p-3 rounded"
+          ><code>{{ alert.raw_data | tojson(indent=2) }}</code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Analysis Results Card -->
+    <div class="col-md-6 mb-4">
+      {% if incident %}
+      <div
+        class="card border-{% if incident.confidence_score >= 80 %}danger{% elif incident.confidence_score >= 60 %}warning{% else %}info{% endif %}"
+      >
+        <div
+          class="card-header bg-{% if incident.confidence_score >= 80 %}danger{% elif incident.confidence_score >= 60 %}warning{% else %}info{% endif %} text-white"
+        >
+          <h5><i class="bi bi-cpu"></i> Analysis Results</h5>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <h6>Confidence Score:</h6>
+            <div class="progress" style="height: 30px">
+              <div
+                class="progress-bar bg-{% if incident.confidence_score >= 80 %}danger{% elif incident.confidence_score >= 60 %}warning{% else %}info{% endif %}"
+                role="progressbar"
+                style="width: {{ incident.confidence_score }}%"
+                aria-valuenow="{{ incident.confidence_score }}"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                {{ incident.confidence_score }}%
+              </div>
+            </div>
+          </div>
+
+          {% if incident.attack_type %}
+          <div class="mb-3">
+            <h6>Detected Attack Type:</h6>
+            <div class="alert alert-danger">
+              <strong
+                >{{ incident.attack_type.name.replace('_', ' ').title()
+                }}</strong
+              >
+              <p class="mb-0 small">{{ incident.attack_type.description }}</p>
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <h6>Recommended Actions:</h6>
+            <ul class="list-group">
+              {% for action in incident.recommended_actions %}
+              <li class="list-group-item">
+                <i class="bi bi-check-circle text-success"></i>
+                <strong>{{ action.replace('_', ' ').title() }}</strong>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+
+          <div class="mb-3">
+            <h6>Matched Rules:</h6>
+            {% if incident.matched_rules %}
+            <p>
+              {{ incident.matched_rules | length }} security rule(s) matched
+            </p>
+            {% else %}
+            <p class="text-muted">No rules matched</p>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <h6>Status:</h6>
+            <span
+              class="badge bg-{% if incident.status == 'new' %}primary{% elif incident.status == 'resolved' %}success{% else %}warning{% endif %}"
+            >
+              {{ incident.status.upper() }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Explanation Card -->
+      <div class="card mt-3">
+        <div class="card-header">
+          <h5><i class="bi bi-chat-left-text"></i> Detailed Explanation</h5>
+        </div>
+        <div class="card-body">
+          <p style="white-space: pre-line">{{ incident.explanation }}</p>
+        </div>
+      </div>
+      {% else %}
+      <div class="alert alert-warning">
+        <i class="bi bi-exclamation-triangle"></i> This alert has not been
+        analyzed yet. {% if session.user_role in ['admin', 'analyst'] %} Click
+        "Re-Analyze" to process it. {% endif %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

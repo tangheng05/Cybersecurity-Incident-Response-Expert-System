@@ -1,0 +1,125 @@
+{% extends "layouts/base.html" %} {% block title %}Submit Security Alert{%
+endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h3><i class="bi bi-shield-plus"></i> Submit Security Alert</h3>
+          <p class="mb-0 small">
+            The system will automatically analyze this alert against all active
+            security rules
+          </p>
+        </div>
+        <div class="card-body">
+          <form method="POST" action="{{ url_for('alerts.create') }}">
+            {{ form.hidden_tag() }}
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.source_ip.label(class="form-label") }} {{
+                form.source_ip(class="form-control" + (" is-invalid" if
+                form.source_ip.errors else "")) }} {% if form.source_ip.errors
+                %}
+                <div class="invalid-feedback">
+                  {% for error in form.source_ip.errors %}{{ error }}{% endfor
+                  %}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >IP address of the attacking source</small
+                >
+              </div>
+
+              <div class="col-md-6 mb-3">
+                {{ form.destination_ip.label(class="form-label") }} {{
+                form.destination_ip(class="form-control" + (" is-invalid" if
+                form.destination_ip.errors else "")) }} {% if
+                form.destination_ip.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.destination_ip.errors %}{{ error }}{%
+                  endfor %}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Optional: Target IP address</small
+                >
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.alert_type.label(class="form-label") }} {{
+                form.alert_type(class="form-control" + (" is-invalid" if
+                form.alert_type.errors else "")) }} {% if form.alert_type.errors
+                %}
+                <div class="invalid-feedback">
+                  {% for error in form.alert_type.errors %}{{ error }}{% endfor
+                  %}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Type of security event</small
+                >
+              </div>
+
+              <div class="col-md-6 mb-3">
+                {{ form.severity.label(class="form-label") }} {{
+                form.severity(class="form-control" + (" is-invalid" if
+                form.severity.errors else "")) }} {% if form.severity.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.severity.errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+                <small class="form-text text-muted"
+                  >Initial severity assessment</small
+                >
+              </div>
+            </div>
+
+            <div class="mb-3">
+              {{ form.raw_data.label(class="form-label") }} {{
+              form.raw_data(class="form-control" + (" is-invalid" if
+              form.raw_data.errors else ""), style="font-family: monospace;") }}
+              {% if form.raw_data.errors %}
+              <div class="invalid-feedback">
+                {% for error in form.raw_data.errors %}{{ error }}{% endfor %}
+              </div>
+              {% endif %}
+              <small class="form-text text-muted">
+                Alert metrics in JSON format. Example fields: failed_attempts,
+                time_window, request_rate, etc.
+              </small>
+            </div>
+
+            <div class="alert alert-info">
+              <h6><i class="bi bi-lightbulb"></i> Sample Alert Data:</h6>
+              <p class="mb-2"><strong>Brute Force Attack:</strong></p>
+              <pre class="mb-2"><code>{
+  "failed_attempts": 6,
+  "time_window": "5 minutes",
+  "same_ip": true,
+  "target_account": "admin"
+}</code></pre>
+              <p class="mb-2"><strong>DDoS Attack:</strong></p>
+              <pre class="mb-0"><code>{
+  "request_rate": 1200,
+  "time_window": "1 minute",
+  "unique_ips": 450,
+  "traffic_spike": true
+}</code></pre>
+            </div>
+
+            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+              <a href="{{ url_for('alerts.index') }}" class="btn btn-secondary">
+                <i class="bi bi-x-circle"></i> Cancel
+              </a>
+              {{ form.submit(class="btn btn-primary btn-lg") }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

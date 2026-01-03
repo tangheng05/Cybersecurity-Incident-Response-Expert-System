@@ -1,0 +1,101 @@
+{% extends "layouts/base.html" %} {% block title %}Security Alerts -
+Cybersecurity Expert System{% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-shield-exclamation"></i> Security Alerts</h2>
+    <a href="{{ url_for('alerts.create') }}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Submit Alert
+    </a>
+  </div>
+
+  <!-- Filter tabs -->
+  <ul class="nav nav-tabs mb-3">
+    <li class="nav-item">
+      <a
+        class="nav-link {% if not current_filter %}active{% endif %}"
+        href="{{ url_for('alerts.index') }}"
+        >All Alerts</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link {% if current_filter == 'new' %}active{% endif %}"
+        href="{{ url_for('alerts.index', status='new') }}"
+        >New</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link {% if current_filter == 'processed' %}active{% endif %}"
+        href="{{ url_for('alerts.index', status='processed') }}"
+        >Processed</a
+      >
+    </li>
+    <li class="nav-item">
+      <a
+        class="nav-link {% if current_filter == 'ignored' %}active{% endif %}"
+        href="{{ url_for('alerts.index', status='ignored') }}"
+        >Ignored</a
+      >
+    </li>
+  </ul>
+
+  {% if alerts %}
+  <div class="table-responsive">
+    <table class="table table-striped table-hover">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Timestamp</th>
+          <th>Source IP</th>
+          <th>Alert Type</th>
+          <th>Severity</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for alert in alerts %}
+        <tr>
+          <td>#{{ alert.id }}</td>
+          <td>{{ alert.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+          <td><code>{{ alert.source_ip }}</code></td>
+          <td>{{ alert.alert_type }}</td>
+          <td>
+            <span
+              class="badge bg-{% if alert.severity == 'critical' %}danger{% elif alert.severity == 'high' %}warning{% elif alert.severity == 'medium' %}info{% else %}secondary{% endif %}"
+            >
+              {{ alert.severity.upper() }}
+            </span>
+          </td>
+          <td>
+            <span
+              class="badge bg-{% if alert.status == 'new' %}primary{% elif alert.status == 'processed' %}success{% else %}secondary{% endif %}"
+            >
+              {{ alert.status.upper() }}
+            </span>
+          </td>
+          <td>
+            <a
+              href="{{ url_for('alerts.detail', alert_id=alert.id) }}"
+              class="btn btn-sm btn-outline-primary"
+            >
+              <i class="bi bi-eye"></i> View
+            </a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No alerts found. {% if current_filter %}
+    <a href="{{ url_for('alerts.index') }}">View all alerts</a>
+    {% else %}
+    <a href="{{ url_for('alerts.create') }}">Submit your first alert</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

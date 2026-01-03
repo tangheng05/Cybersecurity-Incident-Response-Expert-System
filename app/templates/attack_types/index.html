@@ -1,0 +1,104 @@
+{% extends "layouts/base.html" %} {% block title %}Attack Types - Cybersecurity
+Expert System{% endblock %} {% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Attack Types</h2>
+    {% if session.user_role in ['admin', 'analyst'] %}
+    <a href="{{ url_for('attack_type.create') }}" class="btn btn-primary">
+      <i class="bi bi-plus-circle"></i> Add Attack Type
+    </a>
+    {% endif %}
+  </div>
+
+  {% if attack_types %}
+  <div class="row">
+    {% for attack_type in attack_types %}
+    <div class="col-md-6 mb-4">
+      <div
+        class="card {% if not attack_type.is_active %}border-secondary{% endif %}"
+      >
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h5 class="card-title">
+              {{ attack_type.name }} {% if not attack_type.is_active %}
+              <span class="badge bg-secondary">Inactive</span>
+              {% else %}
+              <span class="badge bg-success">Active</span>
+              {% endif %}
+            </h5>
+            <span class="badge bg-danger"
+              >Severity: {{ attack_type.severity_level }}/10</span
+            >
+          </div>
+
+          <p class="card-text text-muted">{{ attack_type.description }}</p>
+
+          <div class="mb-3">
+            <small class="text-muted">
+              <i class="bi bi-shield-check"></i> {{ attack_type.rules|length }}
+              rules
+            </small>
+          </div>
+
+          <div class="btn-group" role="group">
+            <a
+              href="{{ url_for('attack_type.detail', id=attack_type.id) }}"
+              class="btn btn-sm btn-outline-primary"
+            >
+              <i class="bi bi-eye"></i> View Details
+            </a>
+
+            {% if session.user_role in ['admin', 'analyst'] %}
+            <a
+              href="{{ url_for('attack_type.edit', id=attack_type.id) }}"
+              class="btn btn-sm btn-outline-warning"
+            >
+              <i class="bi bi-pencil"></i> Edit
+            </a>
+
+            <form
+              method="POST"
+              action="{{ url_for('attack_type.toggle_status', id=attack_type.id) }}"
+              style="display: inline"
+            >
+              <input
+                type="hidden"
+                name="csrf_token"
+                value="{{ csrf_token() }}"
+              />
+              <button
+                type="submit"
+                class="btn btn-sm btn-outline-{% if attack_type.is_active %}secondary{% else %}success{% endif %}"
+              >
+                <i
+                  class="bi bi-toggle-{% if attack_type.is_active %}off{% else %}on{% endif %}"
+                ></i>
+                {% if attack_type.is_active %}Deactivate{% else %}Activate{%
+                endif %}
+              </button>
+            </form>
+            {% endif %} {% if session.user_role == 'admin' %}
+            <a
+              href="{{ url_for('attack_type.delete', id=attack_type.id) }}"
+              class="btn btn-sm btn-outline-danger"
+            >
+              <i class="bi bi-trash"></i> Delete
+            </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> No attack types found. {% if
+    session.user_role in ['admin', 'analyst'] %}
+    <a href="{{ url_for('attack_type.create') }}"
+      >Create your first attack type</a
+    >. {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
