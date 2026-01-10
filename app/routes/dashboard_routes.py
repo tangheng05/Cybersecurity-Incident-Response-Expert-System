@@ -5,17 +5,15 @@ from app.models.alert import Alert
 from app.models.incident import Incident
 from app.models.rule import Rule
 from app.models.attack_type import AttackType
+from app.utils.decorators import login_required
 from extensions import db
 
 dashboard_bp = Blueprint('dashboard', __name__, url_prefix='/dashboard')
 
 
 @dashboard_bp.route('/', methods=['GET', 'POST'])
+@login_required
 def index():
-    # Check if user is logged in
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
     form = None  # No longer using WTForms
     
     # Handle alert submission

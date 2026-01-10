@@ -9,6 +9,10 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
+    # Redirect to dashboard if already logged in
+    if session.get('user_id'):
+        return redirect(url_for('dashboard.index'))
+    
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -37,6 +41,10 @@ def login():
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
+    # Redirect to dashboard if already logged in
+    if session.get('user_id'):
+        return redirect(url_for('dashboard.index'))
+    
     form = RegisterForm()
     if form.validate_on_submit():
         # Create new user with 'viewer' role (operator/normal user)

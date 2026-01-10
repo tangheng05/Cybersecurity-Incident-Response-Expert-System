@@ -8,25 +8,16 @@ from app.models.incident_history import IncidentHistory
 from app.models.alert import Alert
 from app.models.rule import Rule
 from app.models.attack_type import AttackType
+from app.utils.decorators import login_required, role_required
 from extensions import db
 
 incident_bp = Blueprint('incidents', __name__, url_prefix='/incidents')
 
 
-def check_login():
-    """Check if user is logged in"""
-    if 'user_id' not in session:
-        flash('Please log in to access this page.', 'warning')
-        return False
-    return True
-
-
 @incident_bp.route('/')
+@login_required
 def index():
     """List all incidents - accessible by all logged-in users"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
     # Get filter from query params
     status_filter = request.args.get('status', None)
     
@@ -55,11 +46,9 @@ def index():
 
 
 @incident_bp.route('/<int:incident_id>')
+@login_required
 def detail(incident_id: int):
     """View incident details with full analysis and action tracking"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
     incident = Incident.query.get(incident_id)
     if not incident:
         flash('Incident not found.', 'danger')
@@ -90,15 +79,9 @@ def detail(incident_id: int):
 
 
 @incident_bp.route('/<int:incident_id>/update-status', methods=['POST'])
+@role_required('admin', 'analyst')
 def update_status(incident_id: int):
     """Update incident status - Analyst or Admin only"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can update incident status.', 'danger')
-        return redirect(url_for('incidents.detail', incident_id=incident_id))
-    
     incident = Incident.query.get(incident_id)
     if not incident:
         flash('Incident not found.', 'danger')
@@ -141,15 +124,9 @@ def update_status(incident_id: int):
 
 
 @incident_bp.route('/<int:incident_id>/add-action', methods=['POST'])
+@role_required('admin', 'analyst')
 def add_action(incident_id: int):
     """Record an action taken on incident - Analyst or Admin only"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can record actions.', 'danger')
-        return redirect(url_for('incidents.detail', incident_id=incident_id))
-    
     incident = Incident.query.get(incident_id)
     if not incident:
         flash('Incident not found.', 'danger')
@@ -185,15 +162,9 @@ def add_action(incident_id: int):
 
 
 @incident_bp.route('/<int:incident_id>/assign', methods=['POST'])
+@role_required('admin', 'analyst')
 def assign(incident_id: int):
     """Assign incident to a user - Analyst or Admin only"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can assign incidents.', 'danger')
-        return redirect(url_for('incidents.detail', incident_id=incident_id))
-    
     incident = Incident.query.get(incident_id)
     if not incident:
         flash('Incident not found.', 'danger')

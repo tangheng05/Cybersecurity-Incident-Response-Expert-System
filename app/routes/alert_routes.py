@@ -8,25 +8,16 @@ from app.models.incident import Incident
 from app.forms.alert_forms import AlertForm
 from app.services.alert_service import AlertService
 from app.services.inference_engine import InferenceEngine
+from app.utils.decorators import login_required, role_required
 from extensions import db
 
 alert_bp = Blueprint('alerts', __name__, url_prefix='/alerts')
 
 
-def check_login():
-    """Check if user is logged in"""
-    if 'user_id' not in session:
-        flash('Please log in to access this page.', 'warning')
-        return False
-    return True
-
-
 @alert_bp.route('/')
+@login_required
 def index():
     """List all alerts - accessible by all logged-in users"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
     # Get filter from query params
     status_filter = request.args.get('status', None)
     
@@ -36,11 +27,9 @@ def index():
 
 
 @alert_bp.route('/<int:alert_id>')
+@login_required
 def detail(alert_id: int):
     """View alert details with analysis results"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
     alert = AlertService.get_by_id(alert_id)
     if not alert:
         flash('Alert not found.', 'danger')
@@ -53,11 +42,9 @@ def detail(alert_id: int):
 
 
 @alert_bp.route('/create', methods=['GET', 'POST'])
+@login_required
 def create():
     """Create and analyze new alert - All users can submit"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
     form = AlertForm()
     
     if form.validate_on_submit():
@@ -120,15 +107,9 @@ def create():
 
 
 @alert_bp.route('/<int:alert_id>/analyze', methods=['POST'])
+@role_required('admin', 'analyst')
 def analyze(alert_id: int):
     """Re-analyze an existing alert"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can re-analyze alerts.', 'danger')
-        return redirect(url_for('alerts.detail', alert_id=alert_id))
-    
     alert = AlertService.get_by_id(alert_id)
     if not alert:
         flash('Alert not found.', 'danger')

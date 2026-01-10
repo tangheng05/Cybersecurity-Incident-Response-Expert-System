@@ -1,5 +1,5 @@
 import os
-from flask import Flask, redirect, url_for
+from flask import Flask, redirect, url_for, render_template
 from config import Config
 from extensions import db, csrf
 
@@ -38,6 +38,15 @@ def create_app(config_class: type[Config] = Config):
     @app.route("/")
     def home():
         return redirect(url_for("auth.login"))
+
+    # Error handlers
+    @app.errorhandler(404)
+    def not_found_error(error):
+        return render_template('errors/404.html'), 404
+
+    @app.errorhandler(403)
+    def forbidden_error(error):
+        return render_template('errors/403.html'), 403
 
     # Create tables
     with app.app_context():

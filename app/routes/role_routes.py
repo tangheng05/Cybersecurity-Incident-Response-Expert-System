@@ -1,26 +1,15 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash
 from app.models import User
+from app.utils.decorators import admin_required
 from extensions import db
 
 role_bp = Blueprint('roles', __name__, url_prefix='/roles')
 
 
-def check_admin():
-    """Check if current user is admin"""
-    if 'user_id' not in session:
-        return False
-    if session.get('user_role') != 'admin':
-        return False
-    return True
-
-
 @role_bp.route('/')
+@admin_required
 def index():
     """Display all roles with their descriptions and user counts"""
-    if not check_admin():
-        flash('Access denied. Admin privileges required.', 'danger')
-        return redirect(url_for('dashboard.index'))
-    
     # Define role information
     roles = [
         {
@@ -75,12 +64,9 @@ def index():
 
 
 @role_bp.route('/<role_name>')
+@admin_required
 def detail(role_name):
     """Display detailed information about a specific role"""
-    if not check_admin():
-        flash('Access denied. Admin privileges required.', 'danger')
-        return redirect(url_for('dashboard.index'))
-    
     # Define role information
     role_info = {
         'admin': {

@@ -2,43 +2,25 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from app.models.attack_type import AttackType
 from app.forms.attack_type_forms import AttackTypeForm
 from app.services.attack_type_service import AttackTypeService
+from app.utils.decorators import login_required, role_required
 from extensions import db
 
 attack_type_bp = Blueprint('attack_type', __name__, url_prefix='/attack-types')
 
 
-def check_login():
-    """Check if user is logged in"""
-    if 'user_id' not in session:
-        flash('Please log in to access this page.', 'warning')
-        return False
-    return True
-
-
-def check_analyst_or_admin():
-    """Check if user has analyst or admin role"""
-    if 'user_role' not in session or session['user_role'] not in ['admin', 'analyst']:
-        flash('Access denied. Only Security Analysts and Admins can manage attack types.', 'danger')
-        return False
-    return True
-
-
 @attack_type_bp.route('/')
+@login_required
 def index():
     """List all attack types - accessible by all logged-in users"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
     
     attack_types = AttackTypeService.get_all()
     return render_template('attack_types/index.html', attack_types=attack_types)
 
 
 @attack_type_bp.route('/<int:id>')
+@login_required
 def detail(id):
     """View attack type details - accessible by all logged-in users"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
     attack_type = AttackTypeService.get_by_id(id)
     if not attack_type:
         flash('Attack type not found.', 'danger')
@@ -48,14 +30,9 @@ def detail(id):
 
 
 @attack_type_bp.route('/create', methods=['GET', 'POST'])
+@role_required('admin', 'analyst')
 def create():
     """Create new attack type - Security Analyst and Admin only"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if not check_analyst_or_admin():
-        return redirect(url_for('attack_type.index'))
-    
     form = AttackTypeForm()
     
     if form.validate_on_submit():
@@ -73,14 +50,9 @@ def create():
 
 
 @attack_type_bp.route('/<int:id>/edit', methods=['GET', 'POST'])
+@role_required('admin', 'analyst')
 def edit(id):
     """Edit attack type - Security Analyst and Admin only"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if not check_analyst_or_admin():
-        return redirect(url_for('attack_type.index'))
-    
     attack_type = AttackTypeService.get_by_id(id)
     if not attack_type:
         flash('Attack type not found.', 'danger')
@@ -104,14 +76,9 @@ def edit(id):
 
 
 @attack_type_bp.route('/<int:id>/toggle-status', methods=['POST'])
+@role_required('admin', 'analyst')
 def toggle_status(id):
     """Toggle attack type active status - Security Analyst and Admin only"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if not check_analyst_or_admin():
-        return redirect(url_for('attack_type.index'))
-    
     attack_type = AttackTypeService.toggle_active(id)
     if attack_type:
         status = 'activated' if attack_type.is_active else 'deactivated'
@@ -123,14 +90,9 @@ def toggle_status(id):
 
 
 @attack_type_bp.route('/<int:id>/delete', methods=['GET', 'POST'])
+@role_required('admin', 'analyst')
 def delete(id):
     """Delete attack type - Admin and Analyst"""
-    if not check_login():
-        return redirect(url_for('auth.login'))
-    
-    if not check_analyst_or_admin():
-        return redirect(url_for('attack_type.index'))
-    
     attack_type = AttackTypeService.get_by_id(id)
     if not attack_type:
         flash('Attack type not found.', 'danger')

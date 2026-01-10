@@ -2,25 +2,22 @@ import json
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, session
 from app.forms.rule_forms import RuleForm, ConfirmDeleteRuleForm
 from app.services import RuleService, AttackTypeService
+from app.utils.decorators import login_required, role_required
 
 rule_bp = Blueprint('rules', __name__, url_prefix='/rules')
 
 
 @rule_bp.route('/')
+@login_required
 def index():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
     rules = RuleService.get_all()
     attack_types = {at.id: at for at in AttackTypeService.get_all()}
     return render_template('rules/index.html', rules=rules, attack_types=attack_types)
 
 
 @rule_bp.route('/<int:rule_id>')
+@login_required
 def detail(rule_id: int):
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
     rule = RuleService.get_by_id(rule_id)
     if rule is None:
         abort(404)
@@ -28,14 +25,8 @@ def detail(rule_id: int):
 
 
 @rule_bp.route('/create', methods=['GET', 'POST'])
+@role_required('admin', 'analyst')
 def create():
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can create rules.', 'danger')
-        return redirect(url_for('rules.index'))
-    
     form = RuleForm()
     # Populate attack type choices
     attack_types = AttackTypeService.get_all(active_only=True)
@@ -59,14 +50,8 @@ def create():
 
 
 @rule_bp.route('/<int:rule_id>/edit', methods=['GET', 'POST'])
+@role_required('admin', 'analyst')
 def edit(rule_id: int):
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can edit rules.', 'danger')
-        return redirect(url_for('rules.index'))
-    
     rule = RuleService.get_by_id(rule_id)
     if rule is None:
         abort(404)
@@ -98,14 +83,8 @@ def edit(rule_id: int):
 
 
 @rule_bp.route('/<int:rule_id>/delete', methods=['GET'])
+@role_required('admin', 'analyst')
 def delete_confirm(rule_id: int):
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can delete rules.', 'danger')
-        return redirect(url_for('rules.index'))
-    
     rule = RuleService.get_by_id(rule_id)
     if rule is None:
         abort(404)
@@ -115,14 +94,8 @@ def delete_confirm(rule_id: int):
 
 
 @rule_bp.route('/<int:rule_id>/delete', methods=['POST'])
+@role_required('admin', 'analyst')
 def delete(rule_id: int):
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can delete rules.', 'danger')
-        return redirect(url_for('rules.index'))
-    
     rule = RuleService.get_by_id(rule_id)
     if rule is None:
         abort(404)
@@ -134,14 +107,8 @@ def delete(rule_id: int):
 
 
 @rule_bp.route('/<int:rule_id>/toggle', methods=['POST'])
-def toggle_active(rule_id: int):
-    if 'user_id' not in session:
-        return redirect(url_for('auth.login'))
-    
-    if session.get('user_role') not in ['admin', 'analyst']:
-        flash('Only admins and analysts can toggle rules.', 'danger')
-        return redirect(url_for('rules.index'))
-    
+@role_required('admin', 'analyst')
+def toggle(rule_id: int):
     rule = RuleService.get_by_id(rule_id)
     if rule is None:
         abort(404)
