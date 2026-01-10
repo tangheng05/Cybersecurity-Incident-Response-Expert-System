@@ -108,29 +108,261 @@ endblock %} {% block content %}
 {% endif %}
 
 <div class="mt-4">
-  <div class="card">
-    <div class="card-header bg-secondary text-white">
-      <h5 class="mb-0">📊 Statistics</h5>
+  <div
+    class="card"
+    style="border-radius: 12px; border: 1px solid var(--card-border)"
+  >
+    <div
+      class="card-header"
+      style="
+        background: linear-gradient(
+          135deg,
+          rgba(111, 66, 193, 0.08),
+          rgba(111, 66, 193, 0.03)
+        );
+        border-bottom: 2px solid rgba(111, 66, 193, 0.2);
+        padding: 1.25rem;
+        border-radius: 12px 12px 0 0;
+      "
+    >
+      <h5 class="mb-0" style="font-weight: 600; color: var(--text-primary)">
+        <i class="fas fa-chart-bar me-2" style="color: #6f42c1"></i>
+        Statistics
+      </h5>
     </div>
-    <div class="card-body">
-      <div class="row text-center">
-        <div class="col-md-3">
-          <h3>{{ rules|length }}</h3>
-          <p class="text-muted">Total Rules</p>
+    <div class="card-body" style="padding: 2rem">
+      <div class="row g-4">
+        <div class="col-lg-3 col-md-6">
+          <div
+            style="
+              padding: 24px;
+              background: linear-gradient(
+                135deg,
+                rgba(13, 110, 253, 0.05),
+                rgba(13, 110, 253, 0.02)
+              );
+              border-radius: 10px;
+              border-left: 4px solid #0d6efd;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6
+                style="
+                  color: var(--text-secondary);
+                  font-size: 0.8rem;
+                  text-transform: uppercase;
+                  margin: 0;
+                  letter-spacing: 0.5px;
+                  font-weight: 600;
+                "
+              >
+                Total Rules
+              </h6>
+              <i
+                class="fas fa-shield-alt"
+                style="font-size: 1.2rem; color: #0d6efd; opacity: 0.6"
+              ></i>
+            </div>
+            <div>
+              <span
+                style="
+                  font-size: 2.5rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  line-height: 1;
+                "
+              >
+                {{ rules|length }}
+              </span>
+              <span
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.9rem;
+                  margin-left: 6px;
+                "
+              >
+                rule{{ rules|length != 1 and 's' or '' }}
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="col-md-3">
-          <h3>{{ rules|selectattr('is_active')|list|length }}</h3>
-          <p class="text-muted">Active Rules</p>
+
+        <div class="col-lg-3 col-md-6">
+          <div
+            style="
+              padding: 24px;
+              background: linear-gradient(
+                135deg,
+                rgba(25, 135, 84, 0.05),
+                rgba(25, 135, 84, 0.02)
+              );
+              border-radius: 10px;
+              border-left: 4px solid #198754;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6
+                style="
+                  color: var(--text-secondary);
+                  font-size: 0.8rem;
+                  text-transform: uppercase;
+                  margin: 0;
+                  letter-spacing: 0.5px;
+                  font-weight: 600;
+                "
+              >
+                Active Rules
+              </h6>
+              <i
+                class="fas fa-check-circle"
+                style="font-size: 1.2rem; color: #198754; opacity: 0.6"
+              ></i>
+            </div>
+            <div>
+              <span
+                style="
+                  font-size: 2.5rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  line-height: 1;
+                "
+              >
+                {{ rules|selectattr('is_active')|list|length }}
+              </span>
+              <span
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.9rem;
+                  margin-left: 6px;
+                "
+              >
+                active
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="col-md-3">
-          <h3>
-            {{ rules|selectattr('priority', 'equalto', 'high')|list|length }}
-          </h3>
-          <p class="text-muted">High Priority</p>
+
+        <div class="col-lg-3 col-md-6">
+          <div
+            style="
+              padding: 24px;
+              background: linear-gradient(
+                135deg,
+                rgba(220, 53, 69, 0.05),
+                rgba(220, 53, 69, 0.02)
+              );
+              border-radius: 10px;
+              border-left: 4px solid #dc3545;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6
+                style="
+                  color: var(--text-secondary);
+                  font-size: 0.8rem;
+                  text-transform: uppercase;
+                  margin: 0;
+                  letter-spacing: 0.5px;
+                  font-weight: 600;
+                "
+              >
+                High Priority
+              </h6>
+              <i
+                class="fas fa-exclamation-triangle"
+                style="font-size: 1.2rem; color: #dc3545; opacity: 0.6"
+              ></i>
+            </div>
+            <div>
+              <span
+                style="
+                  font-size: 2.5rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  line-height: 1;
+                "
+              >
+                {{ rules|selectattr('priority', 'equalto', 'high')|list|length
+                }}
+              </span>
+              <span
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.9rem;
+                  margin-left: 6px;
+                "
+              >
+                critical
+              </span>
+            </div>
+          </div>
         </div>
-        <div class="col-md-3">
-          <h3>{{ attack_types|length }}</h3>
-          <p class="text-muted">Attack Types</p>
+
+        <div class="col-lg-3 col-md-6">
+          <div
+            style="
+              padding: 24px;
+              background: linear-gradient(
+                135deg,
+                rgba(111, 66, 193, 0.05),
+                rgba(111, 66, 193, 0.02)
+              );
+              border-radius: 10px;
+              border-left: 4px solid #6f42c1;
+              transition: all 0.3s ease;
+            "
+            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
+            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+          >
+            <div class="d-flex align-items-center justify-content-between mb-3">
+              <h6
+                style="
+                  color: var(--text-secondary);
+                  font-size: 0.8rem;
+                  text-transform: uppercase;
+                  margin: 0;
+                  letter-spacing: 0.5px;
+                  font-weight: 600;
+                "
+              >
+                Attack Types
+              </h6>
+              <i
+                class="fas fa-bug"
+                style="font-size: 1.2rem; color: #6f42c1; opacity: 0.6"
+              ></i>
+            </div>
+            <div>
+              <span
+                style="
+                  font-size: 2.5rem;
+                  font-weight: 700;
+                  color: var(--text-primary);
+                  line-height: 1;
+                "
+              >
+                {{ attack_types|length }}
+              </span>
+              <span
+                style="
+                  color: var(--text-muted);
+                  font-size: 0.9rem;
+                  margin-left: 6px;
+                "
+              >
+                type{{ attack_types|length != 1 and 's' or '' }}
+              </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
