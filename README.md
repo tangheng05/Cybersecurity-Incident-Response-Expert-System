@@ -27,6 +27,7 @@
 ## 🎯 Project Overview
 
 Built with Flask, SQLAlchemy, and a custom inference engine, this system provides:
+
 - **Real-time threat detection** with pattern matching
 - **Automated incident response** with confidence scoring
 - **Role-based access control** for security teams
@@ -95,15 +96,16 @@ python run.py
 8. **Access the system**
 
 Open your browser and navigate to:
+
 ```
 http://127.0.0.1:5000
 ```
 
 ### 🔑 Default Credentials
 
-| Username | Password |
-|----------|----------|
-| `admin` | `Admin@123` |
+| Username | Password    |
+| -------- | ----------- |
+| `admin`  | `Admin@123` |
 
 > ⚠️ **Important:** Change the default password after your first login!
 
@@ -295,29 +297,34 @@ Cybersecurity-Incident-Response-Expert-System/
 <summary>Click to expand database tables</summary>
 
 ### users
+
 ```sql
 id, username, email, full_name, role, is_active,
 password_hash, created_at, updated_at, last_login
 ```
 
 ### attack_types
+
 ```sql
 id, name, description, severity_level, is_active
 ```
 
 ### rules
+
 ```sql
 id, name, attack_type_id, conditions (JSON),
 actions (JSON), priority, severity_score, is_active
 ```
 
 ### alerts
+
 ```sql
 id, timestamp, source_ip, destination_ip, alert_type,
 severity, raw_data (JSON), status, created_at
 ```
 
 ### incidents
+
 ```sql
 id, alert_id, attack_type_id, matched_rules (JSON),
 recommended_actions (JSON), confidence_score, explanation,
@@ -325,6 +332,7 @@ status, assigned_to, created_at, updated_at, resolved_at
 ```
 
 ### incident_history
+
 ```sql
 id, incident_id, action_taken, notes,
 performed_by, timestamp
@@ -345,12 +353,12 @@ performed_by, timestamp
 
 The heart of the system. Analyzes alerts using:
 
-| Component | Description |
-|-----------|-------------|
-| **Pattern Matching** | 70% condition threshold for rule activation |
-| **Confidence Scoring** | Multi-factor algorithm (0-100) |
-| **Action Prioritization** | High → Medium → Low |
-| **Explanation Generation** | Human-readable analysis |
+| Component                  | Description                                 |
+| -------------------------- | ------------------------------------------- |
+| **Pattern Matching**       | 70% condition threshold for rule activation |
+| **Confidence Scoring**     | Multi-factor algorithm (0-100)              |
+| **Action Prioritization**  | High → Medium → Low                         |
+| **Explanation Generation** | Human-readable analysis                     |
 
 ### Confidence Score Calculation
 
@@ -371,6 +379,7 @@ Total:              0-100 points
 <summary>Click to expand example</summary>
 
 **Request:**
+
 ```json
 {
   "failed_attempts": 10,
@@ -381,15 +390,12 @@ Total:              0-100 points
 ```
 
 **Expected Result:**
+
 ```json
 {
   "confidence": 85,
   "attack_type": "Brute Force",
-  "actions": [
-    "block_ip",
-    "alert_security_team",
-    "log_incident"
-  ],
+  "actions": ["block_ip", "alert_security_team", "log_incident"],
   "explanation": "Detected brute force attack based on 10 failed login attempts..."
 }
 ```
@@ -479,14 +485,14 @@ lsof -ti:5000 | xargs kill -9
 
 ## 🎓 Technologies Used
 
-| Category | Technologies |
-|----------|-------------|
-| **Backend** | Flask 2.3.3, Python 3.8+ |
-| **Database** | SQLite, SQLAlchemy 3.1.1 |
-| **Forms** | Flask-WTF 1.1.1, WTForms 3.1.2 |
+| Category           | Technologies                   |
+| ------------------ | ------------------------------ |
+| **Backend**        | Flask 2.3.3, Python 3.8+       |
+| **Database**       | SQLite, SQLAlchemy 3.1.1       |
+| **Forms**          | Flask-WTF 1.1.1, WTForms 3.1.2 |
 | **Authentication** | Werkzeug 2.3.7 (pbkdf2:sha256) |
-| **Frontend** | Bootstrap 5, Chart.js |
-| **Testing** | Pytest 7.4.0 |
+| **Frontend**       | Bootstrap 5, Chart.js          |
+| **Testing**        | Pytest 7.4.0                   |
 
 ## 📊 Test Coverage
 
@@ -508,12 +514,12 @@ lsof -ti:5000 | xargs kill -9
 
 ## 📊 Test Coverage
 
-| Test Category | Coverage |
-|--------------|----------|
-| **Model Tests** | 6 models fully tested |
-| **Service Tests** | All services with edge cases |
-| **Integration Tests** | Brute Force & DDoS simulations |
-| **Edge Cases** | Empty data, inactive rules, multiple matches |
+| Test Category         | Coverage                                     |
+| --------------------- | -------------------------------------------- |
+| **Model Tests**       | 6 models fully tested                        |
+| **Service Tests**     | All services with edge cases                 |
+| **Integration Tests** | Brute Force & DDoS simulations               |
+| **Edge Cases**        | Empty data, inactive rules, multiple matches |
 
 ## 🤝 Contributing
 
@@ -532,6 +538,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📞 Contact
 
 For questions or issues, please:
+
 - Open an issue on GitHub
 - Refer to the documentation in `CODEBASE_STRUCTURE.md`
 - Check the `PROJECT_MILESTONES.md` for detailed feature tracking
