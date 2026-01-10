@@ -71,7 +71,7 @@ pip install -r requirements.txt
 4. **Initialize database**
 
 ```bash
-python run.py
+python main.py
 # Press Ctrl+C after database is created
 ```
 
@@ -90,7 +90,7 @@ python seed_rules.py
 7. **Run the application**
 
 ```bash
-python run.py
+python main.py
 ```
 
 8. **Access the system**
@@ -287,7 +287,7 @@ Cybersecurity-Incident-Response-Expert-System/
 ├── seed_rules.py           # Rules seeding script
 ├── pytest.ini              # Pytest configuration
 ├── requirements.txt        # Dependencies
-├── run.py                  # Entry point
+├── main.py                  # Entry point
 └── README.md              # This file
 ```
 
@@ -427,7 +427,7 @@ rm instance/cybersecurity.db      # Linux/Mac
 del instance\cybersecurity.db     # Windows
 
 # Recreate everything
-python run.py
+python main.py
 python create_admin.py
 python seed_rules.py
 ```
