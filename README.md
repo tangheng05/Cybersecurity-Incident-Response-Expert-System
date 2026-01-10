@@ -7,7 +7,7 @@
 
 > An automated incident response expert system that analyzes security alerts using if-then rules and provides actionable recommendations for handling Brute Force and DDoS attacks.
 
-**Status:** ✅ All Milestones Completed | Production Ready | Testing Complete
+
 
 ## 📋 Table of Contents
 
