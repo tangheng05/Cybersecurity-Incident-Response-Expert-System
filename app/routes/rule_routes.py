@@ -32,7 +32,7 @@ def create():
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     
-    if session.get('role') not in ['admin', 'analyst']:
+    if session.get('user_role') not in ['admin', 'analyst']:
         flash('Only admins and analysts can create rules.', 'danger')
         return redirect(url_for('rules.index'))
     
@@ -63,7 +63,7 @@ def edit(rule_id: int):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     
-    if session.get('role') not in ['admin', 'analyst']:
+    if session.get('user_role') not in ['admin', 'analyst']:
         flash('Only admins and analysts can edit rules.', 'danger')
         return redirect(url_for('rules.index'))
     
@@ -102,8 +102,8 @@ def delete_confirm(rule_id: int):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     
-    if session.get('role') != 'admin':
-        flash('Only admins can delete rules.', 'danger')
+    if session.get('user_role') not in ['admin', 'analyst']:
+        flash('Only admins and analysts can delete rules.', 'danger')
         return redirect(url_for('rules.index'))
     
     rule = RuleService.get_by_id(rule_id)
@@ -119,8 +119,8 @@ def delete(rule_id: int):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     
-    if session.get('role') != 'admin':
-        flash('Only admins can delete rules.', 'danger')
+    if session.get('user_role') not in ['admin', 'analyst']:
+        flash('Only admins and analysts can delete rules.', 'danger')
         return redirect(url_for('rules.index'))
     
     rule = RuleService.get_by_id(rule_id)
@@ -138,7 +138,7 @@ def toggle_active(rule_id: int):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
     
-    if session.get('role') not in ['admin', 'analyst']:
+    if session.get('user_role') not in ['admin', 'analyst']:
         flash('Only admins and analysts can toggle rules.', 'danger')
         return redirect(url_for('rules.index'))
     

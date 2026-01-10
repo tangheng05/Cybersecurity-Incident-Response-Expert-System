@@ -77,7 +77,7 @@ Expert System{% endblock %} {% block content %}
                 endif %}
               </button>
             </form>
-            {% endif %} {% if session.user_role == 'admin' %}
+
             <a
               href="{{ url_for('attack_type.delete', id=attack_type.id) }}"
               class="btn btn-sm btn-outline-danger"

@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from datetime import datetime
-from app.forms.auth_forms import LoginForm
+from app.forms.auth_forms import LoginForm, RegisterForm
 from app.models import User
 from extensions import db
 
@@ -21,7 +21,7 @@ def login():
             # Store user info in session
             session['user_id'] = user.id
             session['username'] = user.username
-            session['role'] = user.role
+            session['user_role'] = user.role  # Changed from 'role' to 'user_role'
             
             # Update last login
             user.last_login = datetime.utcnow()
@@ -33,6 +33,29 @@ def login():
             flash('Invalid username or password.', 'danger')
     
     return render_template('auth/login.html', form=form)
+
+
+@auth_bp.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        # Create new user with 'viewer' role (operator/normal user)
+        user = User(
+            username=form.username.data,
+            email=form.email.data,
+            full_name=form.full_name.data,
+            role='viewer',  # Default role for self-registered users
+            is_active=True
+        )
+        user.set_password(form.password.data)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        flash(f'Account created successfully! You can now log in as {user.username}.', 'success')
+        return redirect(url_for('auth.login'))
+    
+    return render_template('auth/register.html', form=form)
 
 
 @auth_bp.route('/logout')

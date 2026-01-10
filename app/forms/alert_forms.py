@@ -1,7 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SelectField, TextAreaField, SubmitField
-from wtforms.validators import DataRequired, IPAddress, Optional as OptionalValidator, Length
-import json
+from wtforms import StringField, SelectField, TextAreaField, SubmitField, IntegerField
+from wtforms.validators import DataRequired, IPAddress, Optional as OptionalValidator, Length, NumberRange
 
 
 class AlertForm(FlaskForm):
@@ -17,10 +16,17 @@ class AlertForm(FlaskForm):
         validators=[OptionalValidator(), IPAddress(message='Invalid IP address')]
     )
     
-    alert_type = StringField(
+    alert_type = SelectField(
         'Alert Type',
-        validators=[DataRequired(), Length(min=3, max=50)],
-        default='manual_submission'
+        choices=[
+            ('suspicious_activity', 'Suspicious Activity'),
+            ('login_attempt', 'Login Attempt'),
+            ('network_traffic', 'Network Traffic'),
+            ('malware_detected', 'Malware Detected'),
+            ('other', 'Other')
+        ],
+        validators=[DataRequired()],
+        default='suspicious_activity'
     )
     
     severity = SelectField(
@@ -35,17 +41,36 @@ class AlertForm(FlaskForm):
         default='medium'
     )
     
-    raw_data = TextAreaField(
-        'Alert Data (JSON)',
-        validators=[DataRequired()],
-        render_kw={'rows': 10, 'placeholder': '{\n  "failed_attempts": 6,\n  "time_window": "5 minutes"\n}'}
+    # Brute Force Fields
+    failed_attempts = IntegerField(
+        'Failed Login Attempts',
+        validators=[OptionalValidator(), NumberRange(min=0, max=1000)],
+        render_kw={'placeholder': 'e.g., 5'}
+    )
+    
+    target_service = StringField(
+        'Target Service/Endpoint',
+        validators=[OptionalValidator(), Length(max=100)],
+        render_kw={'placeholder': 'e.g., ssh, /api/login'}
+    )
+    
+    # DDoS Fields
+    requests_per_second = IntegerField(
+        'Requests Per Second',
+        validators=[OptionalValidator(), NumberRange(min=0, max=1000000)],
+        render_kw={'placeholder': 'e.g., 10000'}
+    )
+    
+    time_window = IntegerField(
+        'Time Window (seconds)',
+        validators=[OptionalValidator(), NumberRange(min=1, max=86400)],
+        render_kw={'placeholder': 'e.g., 300'}
+    )
+    
+    description = TextAreaField(
+        'Additional Details',
+        validators=[OptionalValidator()],
+        render_kw={'rows': 3, 'placeholder': 'Optional: Any additional information about this alert...'}
     )
     
     submit = SubmitField('Submit Alert for Analysis')
-    
-    def validate_raw_data(self, field):
-        """Validate that raw_data is valid JSON"""
-        try:
-            json.loads(field.data)
-        except json.JSONDecodeError as e:
-            raise ValueError(f'Invalid JSON format: {str(e)}')

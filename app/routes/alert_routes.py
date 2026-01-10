@@ -62,8 +62,21 @@ def create():
     
     if form.validate_on_submit():
         try:
-            # Parse raw data JSON
-            raw_data = json.loads(form.raw_data.data)
+            # Build raw_data from form fields
+            raw_data = {
+                'source_ip': form.source_ip.data,
+                'description': form.description.data
+            }
+            
+            # Add optional fields if provided
+            if form.failed_attempts.data:
+                raw_data['failed_attempts'] = form.failed_attempts.data
+            if form.target_service.data:
+                raw_data['target_service'] = form.target_service.data
+            if form.requests_per_second.data:
+                raw_data['requests_per_second'] = form.requests_per_second.data
+            if form.time_window.data:
+                raw_data['time_window'] = form.time_window.data
             
             # Create alert
             alert = AlertService.create({
@@ -99,8 +112,6 @@ def create():
             flash(f'Alert analyzed successfully! Confidence: {analysis_result["confidence_score"]}%', 'success')
             return redirect(url_for('alerts.detail', alert_id=alert.id))
             
-        except json.JSONDecodeError:
-            flash('Invalid JSON format in Alert Data field.', 'danger')
         except Exception as e:
             db.session.rollback()
             flash(f'Error processing alert: {str(e)}', 'danger')

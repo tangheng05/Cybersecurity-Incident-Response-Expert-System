@@ -2,7 +2,7 @@
 endblock %} {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="h3">Security Rules</h1>
-  {% if session.role in ['admin', 'analyst'] %}
+  {% if session.user_role in ['admin', 'analyst'] %}
   <a href="{{ url_for('rules.create') }}" class="btn btn-primary"
     >+ Create New Rule</a
   >
@@ -61,27 +61,31 @@ endblock %} {% block content %}
           {% endif %}
         </td>
         <td>
-          <a
-            href="{{ url_for('rules.detail', rule_id=rule.id) }}"
-            class="btn btn-sm btn-outline-info"
-            title="View"
-            >👁️</a
-          >
-          {% if session.role in ['admin', 'analyst'] %}
-          <a
-            href="{{ url_for('rules.edit', rule_id=rule.id) }}"
-            class="btn btn-sm btn-outline-secondary"
-            title="Edit"
-            >✏️</a
-          >
-          {% endif %} {% if session.role == 'admin' %}
-          <a
-            href="{{ url_for('rules.delete_confirm', rule_id=rule.id) }}"
-            class="btn btn-sm btn-outline-danger"
-            title="Delete"
-            >🗑️</a
-          >
-          {% endif %}
+          <div class="btn-group" role="group">
+            <a
+              href="{{ url_for('rules.detail', rule_id=rule.id) }}"
+              class="btn btn-sm btn-outline-info"
+              title="View Details"
+            >
+              <i class="fas fa-eye"></i>
+            </a>
+            {% if session.user_role in ['admin', 'analyst'] %}
+            <a
+              href="{{ url_for('rules.edit', rule_id=rule.id) }}"
+              class="btn btn-sm btn-outline-warning"
+              title="Edit Rule"
+            >
+              <i class="fas fa-edit"></i>
+            </a>
+            <a
+              href="{{ url_for('rules.delete_confirm', rule_id=rule.id) }}"
+              class="btn btn-sm btn-outline-danger"
+              title="Delete Rule"
+            >
+              <i class="fas fa-trash"></i>
+            </a>
+            {% endif %}
+          </div>
         </td>
       </tr>
       {% endfor %}
@@ -95,7 +99,7 @@ endblock %} {% block content %}
     The knowledge base is empty. Create your first rule to start detecting
     security incidents.
   </p>
-  {% if session.role in ['admin', 'analyst'] %}
+  {% if session.user_role in ['admin', 'analyst'] %}
   <a href="{{ url_for('rules.create') }}" class="btn btn-primary"
     >Create First Rule</a
   >

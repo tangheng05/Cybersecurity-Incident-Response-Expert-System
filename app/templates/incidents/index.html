@@ -1,0 +1,208 @@
+{% extends "layouts/base.html" %} {% block title %}Incident Management{%
+endblock %} {% block content %}
+<div class="mb-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h1 class="h2" style="font-weight: 700; color: var(--text-primary)">
+        <i class="fas fa-fire-extinguisher me-2"></i>Incident Management
+      </h1>
+      <p style="color: var(--text-secondary); font-size: 0.95rem">
+        Track, analyze, and resolve security incidents
+      </p>
+    </div>
+    <a href="{{ url_for('alerts.create') }}" class="btn btn-primary">
+      <i class="fas fa-plus me-2"></i>Submit New Alert
+    </a>
+  </div>
+</div>
+
+<!-- Status Filter Cards -->
+<div class="row mb-4">
+  <div class="col">
+    <div class="btn-group w-100" role="group">
+      <a
+        href="{{ url_for('incidents.index') }}"
+        class="btn {% if not current_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+        style="border-top-left-radius: 8px; border-bottom-left-radius: 8px"
+      >
+        <div class="d-flex flex-column align-items-center py-2">
+          <span class="h4 mb-0">{{ status_counts.all }}</span>
+          <span class="small text-uppercase">All Incidents</span>
+        </div>
+      </a>
+      <a
+        href="{{ url_for('incidents.index', status='new') }}"
+        class="btn {% if current_filter == 'new' %}btn-primary{% else %}btn-outline-secondary{% endif %}"
+      >
+        <div class="d-flex flex-column align-items-center py-2">
+          <span class="h4 mb-0">{{ status_counts.new }}</span>
+          <span class="small text-uppercase">New</span>
+        </div>
+      </a>
+      <a
+        href="{{ url_for('incidents.index', status='analyzing') }}"
+        class="btn {% if current_filter == 'analyzing' %}btn-info{% else %}btn-outline-secondary{% endif %}"
+      >
+        <div class="d-flex flex-column align-items-center py-2">
+          <span class="h4 mb-0">{{ status_counts.analyzing }}</span>
+          <span class="small text-uppercase">Analyzing</span>
+        </div>
+      </a>
+      <a
+        href="{{ url_for('incidents.index', status='pending') }}"
+        class="btn {% if current_filter == 'pending' %}btn-warning{% else %}btn-outline-secondary{% endif %}"
+      >
+        <div class="d-flex flex-column align-items-center py-2">
+          <span class="h4 mb-0">{{ status_counts.pending }}</span>
+          <span class="small text-uppercase">Pending</span>
+        </div>
+      </a>
+      <a
+        href="{{ url_for('incidents.index', status='resolved') }}"
+        class="btn {% if current_filter == 'resolved' %}btn-success{% else %}btn-outline-secondary{% endif %}"
+        style="border-top-right-radius: 8px; border-bottom-right-radius: 8px"
+      >
+        <div class="d-flex flex-column align-items-center py-2">
+          <span class="h4 mb-0">{{ status_counts.resolved }}</span>
+          <span class="small text-uppercase">Resolved</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Incidents Table -->
+<div class="card">
+  <div class="card-header">
+    <i class="fas fa-list me-2"></i>
+    {% if current_filter %} {{ current_filter|title }} Incidents {% else %} All
+    Incidents {% endif %}
+  </div>
+  <div class="card-body p-0">
+    {% if incidents %}
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th class="ps-4">ID</th>
+            <th>Alert Ref</th>
+            <th>Attack Type</th>
+            <th>Confidence</th>
+            <th>Status</th>
+            <th>Assigned To</th>
+            <th>Created</th>
+            <th class="text-end pe-4">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for incident in incidents %}
+          <tr>
+            <td class="ps-4">
+              <span style="font-family: monospace; color: var(--primary-color)"
+                >#{{ incident.id }}</span
+              >
+            </td>
+            <td>
+              <a
+                href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}"
+                class="text-decoration-none"
+              >
+                <i class="fas fa-link me-1 text-muted"></i>Alert #{{
+                incident.alert_id }}
+              </a>
+            </td>
+            <td>
+              {% if incident.attack_type_id %}
+              <span class="badge bg-danger">
+                <i class="fas fa-bug me-1"></i>Type {{ incident.attack_type_id
+                }}
+              </span>
+              {% else %}
+              <span class="badge bg-secondary">Unknown</span>
+              {% endif %}
+            </td>
+            <td style="width: 15%">
+              <div class="d-flex align-items-center">
+                <div class="progress flex-grow-1" style="height: 6px">
+                  <div
+                    class="progress-bar {% if incident.confidence_score >= 80 %}bg-success{% elif incident.confidence_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                    role="progressbar"
+                    style="width: {{ incident.confidence_score }}%"
+                    aria-valuenow="{{ incident.confidence_score }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                </div>
+                <span class="ms-2 small text-muted"
+                  >{{ incident.confidence_score }}%</span
+                >
+              </div>
+            </td>
+            <td>
+              {% if incident.status == 'new' %}
+              <span class="badge bg-primary">New</span>
+              {% elif incident.status == 'analyzing' %}
+              <span class="badge bg-info">Analyzing</span>
+              {% elif incident.status == 'pending' %}
+              <span class="badge bg-warning">Pending</span>
+              {% else %}
+              <span class="badge bg-success">Resolved</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if incident.assigned_user %}
+              <div class="d-flex align-items-center">
+                <div
+                  class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-2"
+                  style="width: 24px; height: 24px; font-size: 10px"
+                >
+                  {{ incident.assigned_user.username[:2].upper() }}
+                </div>
+                <span class="small">{{ incident.assigned_user.username }}</span>
+              </div>
+              {% else %}
+              <span class="text-muted small">
+                <i class="far fa-user me-1"></i>Unassigned
+              </span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">
+              {{ incident.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </td>
+            <td class="text-end pe-4">
+              <a
+                href="{{ url_for('incidents.detail', incident_id=incident.id) }}"
+                class="btn btn-sm btn-outline-primary"
+              >
+                View Details
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <div class="mb-3">
+        <i
+          class="fas fa-clipboard-check fa-3x"
+          style="color: var(--card-border)"
+        ></i>
+      </div>
+      <h5 style="color: var(--text-secondary)">No Incidents Found</h5>
+      <p class="text-muted">
+        {% if current_filter %} No incidents match the status "{{ current_filter
+        }}". {% else %} Great job! There are no active incidents to manage. {%
+        endif %}
+      </p>
+      {% if current_filter %}
+      <a href="{{ url_for('incidents.index') }}" class="btn btn-outline-primary"
+        >View All Incidents</a
+      >
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -124,12 +124,11 @@ def toggle_status(id):
 
 @attack_type_bp.route('/<int:id>/delete', methods=['GET', 'POST'])
 def delete(id):
-    """Delete attack type - Admin only"""
+    """Delete attack type - Admin and Analyst"""
     if not check_login():
         return redirect(url_for('auth.login'))
     
-    if 'user_role' not in session or session['user_role'] != 'admin':
-        flash('Access denied. Only Admins can delete attack types.', 'danger')
+    if not check_analyst_or_admin():
         return redirect(url_for('attack_type.index'))
     
     attack_type = AttackTypeService.get_by_id(id)

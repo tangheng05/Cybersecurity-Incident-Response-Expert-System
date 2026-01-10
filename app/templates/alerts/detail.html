@@ -140,15 +140,6 @@ Details{% endblock %} {% block content %}
             <p class="text-muted">No rules matched</p>
             {% endif %}
           </div>
-
-          <div class="mb-3">
-            <h6>Status:</h6>
-            <span
-              class="badge bg-{% if incident.status == 'new' %}primary{% elif incident.status == 'resolved' %}success{% else %}warning{% endif %}"
-            >
-              {{ incident.status.upper() }}
-            </span>
-          </div>
         </div>
       </div>
 

@@ -22,6 +22,8 @@ def create_app(config_class: type[Config] = Config):
     from app.routes.rule_routes import rule_bp
     from app.routes.attack_type_routes import attack_type_bp
     from app.routes.alert_routes import alert_bp
+    from app.routes.incident_routes import incident_bp
+    from app.routes.role_routes import role_bp
     
     app.register_blueprint(user_bp)
     app.register_blueprint(auth_bp)
@@ -29,6 +31,8 @@ def create_app(config_class: type[Config] = Config):
     app.register_blueprint(rule_bp)
     app.register_blueprint(attack_type_bp)
     app.register_blueprint(alert_bp)
+    app.register_blueprint(incident_bp)
+    app.register_blueprint(role_bp)
 
     # Root route redirects to dashboard
     @app.route("/")

@@ -1,0 +1,120 @@
+{% extends "layouts/base.html" %} {% block title %}Register{% endblock %} {%
+block content %}
+<div class="login-container">
+  <div class="login-card" style="max-width: 500px">
+    <div class="login-header">
+      <div class="login-logo"><i class="fas fa-user-plus"></i></div>
+      <h1 class="login-title">Create Account</h1>
+      <p style="color: var(--text-secondary); font-size: 1rem">
+        Join the Cybersecurity Incident Response System
+      </p>
+    </div>
+
+    <form method="POST" novalidate>
+      {{ form.hidden_tag() }}
+
+      <div class="mb-3">
+        {{ form.username.label(class="form-label") }} {{
+        form.username(class="form-control" + (" is-invalid" if
+        form.username.errors else ""), placeholder="Choose a username") }} {% if
+        form.username.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.username.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.email.label(class="form-label") }} {{
+        form.email(class="form-control" + (" is-invalid" if form.email.errors
+        else ""), placeholder="Enter your email") }} {% if form.email.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.email.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.full_name.label(class="form-label") }} {{
+        form.full_name(class="form-control" + (" is-invalid" if
+        form.full_name.errors else ""), placeholder="Enter your full name") }}
+        {% if form.full_name.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.full_name.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.password.label(class="form-label") }} {{
+        form.password(class="form-control" + (" is-invalid" if
+        form.password.errors else ""), placeholder="Create a strong password")
+        }} {% if form.password.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.password.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+        <div
+          id="passwordHelp"
+          class="form-text"
+          style="color: var(--text-muted)"
+        >
+          Minimum 8 characters required
+        </div>
+      </div>
+
+      <div class="mb-4">
+        {{ form.confirm_password.label(class="form-label") }} {{
+        form.confirm_password(class="form-control" + (" is-invalid" if
+        form.confirm_password.errors else ""), placeholder="Re-enter your
+        password") }} {% if form.confirm_password.errors %}
+        <div class="invalid-feedback">
+          {% for error in form.confirm_password.errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="d-grid mb-3">
+        {{ form.submit(class="btn btn-primary btn-lg w-100") }}
+      </div>
+
+      <!-- Back to Login -->
+      <div style="text-align: center; padding: 12px">
+        <p style="color: var(--text-secondary); margin: 0; font-size: 0.9rem">
+          Already have an account?
+          <a
+            href="{{ url_for('auth.login') }}"
+            style="color: var(--primary-color); font-weight: 600"
+          >
+            Login here
+          </a>
+        </p>
+      </div>
+
+      <!-- Role Information -->
+      <div
+        style="
+          text-align: center;
+          padding: 14px;
+          background: var(--darker-bg);
+          border-radius: 6px;
+          border-left: 4px solid var(--info-color);
+        "
+      >
+        <p
+          style="
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.85rem;
+            line-height: 1.5;
+          "
+        >
+          <i class="fas fa-info-circle me-1"></i> New accounts are registered as
+          <strong style="color: var(--text-primary)">Operators</strong> with
+          view-only access. Contact an administrator for elevated permissions.
+        </p>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

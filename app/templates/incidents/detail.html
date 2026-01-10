@@ -1,0 +1,310 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Incident #{{ incident.id }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h1 class="h3">🎯 Incident #{{ incident.id }}</h1>
+  <div>
+    <a href="{{ url_for('incidents.index') }}" class="btn btn-outline-secondary">← Back to Incidents</a>
+    <a href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}" class="btn btn-outline-primary">View Alert #{{ incident.alert_id }}</a>
+  </div>
+</div>
+
+<div class="row">
+  <!-- Left Column: Incident Details -->
+  <div class="col-md-8">
+    <!-- Incident Overview -->
+    <div class="card mb-3">
+      <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Incident Overview</h5>
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Incident ID:</dt>
+          <dd class="col-sm-8"><strong>#{{ incident.id }}</strong></dd>
+
+          <dt class="col-sm-4">Alert ID:</dt>
+          <dd class="col-sm-8">
+            <a href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}">#{{ incident.alert_id }}</a>
+          </dd>
+
+          <dt class="col-sm-4">Attack Type:</dt>
+          <dd class="col-sm-8">
+            {% if attack_type %}
+            <span class="badge bg-danger">{{ attack_type.name }}</span>
+            <span class="text-muted">(Severity: {{ attack_type.severity_level }}/10)</span>
+            {% else %}
+            <span class="badge bg-secondary">Unknown</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4">Confidence Score:</dt>
+          <dd class="col-sm-8">
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress flex-grow-1" style="height: 25px;">
+                <div class="progress-bar 
+                  {% if incident.confidence_score >= 80 %}bg-success
+                  {% elif incident.confidence_score >= 50 %}bg-warning text-dark
+                  {% else %}bg-danger{% endif %}" 
+                     role="progressbar" 
+                     style="width: {{ incident.confidence_score }}%"
+                     aria-valuenow="{{ incident.confidence_score }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                  <strong>{{ incident.confidence_score }}%</strong>
+                </div>
+              </div>
+            </div>
+          </dd>
+
+          <dt class="col-sm-4">Status:</dt>
+          <dd class="col-sm-8">
+            {% if incident.status == 'new' %}
+            <span class="badge bg-primary">New</span>
+            {% elif incident.status == 'analyzing' %}
+            <span class="badge bg-info">Analyzing</span>
+            {% elif incident.status == 'pending' %}
+            <span class="badge bg-warning">Pending</span>
+            {% else %}
+            <span class="badge bg-success">Resolved</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4">Assigned To:</dt>
+          <dd class="col-sm-8">
+            {% if incident.assigned_user %}
+            <span class="badge bg-info">{{ incident.assigned_user.username }}</span>
+            {% else %}
+            <span class="text-muted">Unassigned</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-sm-4">Created:</dt>
+          <dd class="col-sm-8">{{ incident.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</dd>
+
+          <dt class="col-sm-4">Last Updated:</dt>
+          <dd class="col-sm-8">{{ incident.updated_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</dd>
+
+          {% if incident.resolved_at %}
+          <dt class="col-sm-4">Resolved:</dt>
+          <dd class="col-sm-8">{{ incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</dd>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <!-- Analysis Explanation -->
+    <div class="card mb-3">
+      <div class="card-header bg-info text-white">
+        <h5 class="mb-0">🔍 Analysis Explanation</h5>
+      </div>
+      <div class="card-body">
+        <p class="mb-0">{{ incident.explanation or 'No explanation available.' }}</p>
+      </div>
+    </div>
+
+    <!-- Matched Rules -->
+    <div class="card mb-3">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">📋 Matched Rules ({{ matched_rules|length }})</h5>
+      </div>
+      <div class="card-body">
+        {% if matched_rules %}
+        <div class="list-group">
+          {% for rule in matched_rules %}
+          <div class="list-group-item">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h6 class="mb-1">{{ rule.name }}</h6>
+                <p class="mb-1 text-muted small">{{ rule.conditions }}</p>
+              </div>
+              <div>
+                {% if rule.priority == 'high' %}
+                <span class="badge bg-danger">High Priority</span>
+                {% elif rule.priority == 'medium' %}
+                <span class="badge bg-warning">Medium Priority</span>
+                {% else %}
+                <span class="badge bg-info">Low Priority</span>
+                {% endif %}
+                <span class="badge bg-secondary">Severity: {{ rule.severity_score }}/10</span>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No rules matched for this incident.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recommended Actions -->
+    <div class="card mb-3">
+      <div class="card-header bg-warning text-dark">
+        <h5 class="mb-0">⚡ Recommended Actions</h5>
+      </div>
+      <div class="card-body">
+        {% if incident.recommended_actions %}
+        <ol class="mb-0">
+          {% for action in incident.recommended_actions %}
+          <li>{{ action }}</li>
+          {% endfor %}
+        </ol>
+        {% else %}
+        <p class="text-muted mb-0">No recommended actions available.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Action History -->
+    <div class="card mb-3">
+      <div class="card-header bg-dark text-white">
+        <h5 class="mb-0">📝 Action History</h5>
+      </div>
+      <div class="card-body">
+        {% if history %}
+        <div class="timeline">
+          {% for entry in history %}
+          <div class="mb-3 pb-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">{{ entry.action_taken }}</h6>
+                {% if entry.notes %}
+                <p class="mb-1 text-muted">{{ entry.notes }}</p>
+                {% endif %}
+                <small class="text-muted">
+                  By: {% if entry.user %}{{ entry.user.username }}{% else %}System{% endif %} | 
+                  {{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                </small>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-muted mb-0">No actions recorded yet.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Column: Actions Panel -->
+  <div class="col-md-4">
+    <!-- Status Management -->
+    {% if session.user_role in ['admin', 'analyst'] %}
+    <div class="card mb-3">
+      <div class="card-header bg-primary text-white">
+        <h5 class="mb-0">🔧 Manage Incident</h5>
+      </div>
+      <div class="card-body">
+        <!-- Update Status -->
+        <form method="POST" action="{{ url_for('incidents.update_status', incident_id=incident.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          <div class="mb-3">
+            <label for="status" class="form-label">Update Status:</label>
+            <select name="status" id="status" class="form-select" required>
+              <option value="new" {% if incident.status == 'new' %}selected{% endif %}>New</option>
+              <option value="analyzing" {% if incident.status == 'analyzing' %}selected{% endif %}>Analyzing</option>
+              <option value="pending" {% if incident.status == 'pending' %}selected{% endif %}>Pending</option>
+              <option value="resolved" {% if incident.status == 'resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="notes" class="form-label">Notes (Optional):</label>
+            <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100">Update Status</button>
+        </form>
+
+        <hr>
+
+        <!-- Assignment -->
+        <form method="POST" action="{{ url_for('incidents.assign', incident_id=incident.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          {% if incident.assigned_to == session.user_id %}
+          <button type="submit" class="btn btn-outline-secondary w-100">Unassign from Me</button>
+          {% else %}
+          <input type="hidden" name="assign_to_me" value="1"/>
+          <button type="submit" class="btn btn-outline-info w-100">Assign to Me</button>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+
+    <!-- Record Action -->
+    <div class="card mb-3">
+      <div class="card-header bg-success text-white">
+        <h5 class="mb-0">✅ Record Action</h5>
+      </div>
+      <div class="card-body">
+        <form method="POST" action="{{ url_for('incidents.add_action', incident_id=incident.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+          
+          <div class="mb-3">
+            <label for="action_taken" class="form-label">Action Taken:</label>
+            <input type="text" name="action_taken" id="action_taken" 
+                   class="form-control" placeholder="e.g., Blocked IP address" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="action_notes" class="form-label">Details:</label>
+            <textarea name="notes" id="action_notes" class="form-control" rows="3" 
+                      placeholder="Additional details about the action..."></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-success w-100">Save Action</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Alert Information Card -->
+    <div class="card mb-3">
+      <div class="card-header bg-secondary text-white">
+        <h5 class="mb-0">🚨 Related Alert</h5>
+      </div>
+      <div class="card-body">
+        {% if alert %}
+        <dl class="row mb-0 small">
+          <dt class="col-6">Alert ID:</dt>
+          <dd class="col-6">#{{ alert.id }}</dd>
+
+          <dt class="col-6">Type:</dt>
+          <dd class="col-6">{{ alert.alert_type }}</dd>
+
+          <dt class="col-6">Source IP:</dt>
+          <dd class="col-6"><code>{{ alert.source_ip }}</code></dd>
+
+          <dt class="col-6">Severity:</dt>
+          <dd class="col-6">
+            {% if alert.severity == 'critical' %}
+            <span class="badge bg-danger">Critical</span>
+            {% elif alert.severity == 'high' %}
+            <span class="badge bg-warning">High</span>
+            {% elif alert.severity == 'medium' %}
+            <span class="badge bg-info">Medium</span>
+            {% else %}
+            <span class="badge bg-secondary">Low</span>
+            {% endif %}
+          </dd>
+
+          <dt class="col-6">Timestamp:</dt>
+          <dd class="col-6">{{ alert.timestamp.strftime('%Y-%m-%d %H:%M') }}</dd>
+        </dl>
+        <a href="{{ url_for('alerts.detail', alert_id=alert.id) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">
+          View Full Alert →
+        </a>
+        {% else %}
+        <p class="text-muted mb-0">Alert information not available.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
