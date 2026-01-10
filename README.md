@@ -3,7 +3,7 @@
 ![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
 ![Flask](https://img.shields.io/badge/flask-2.3.3-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
-![Status](https://img.shields.io/badge/status-production%20ready-brightgreen.svg)
+
 
 > An automated incident response expert system that analyzes security alerts using if-then rules and provides actionable recommendations for handling Brute Force and DDoS attacks.
 
