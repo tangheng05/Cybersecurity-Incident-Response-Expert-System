@@ -17,6 +17,54 @@ block extra_css %}
     border-radius: 8px;
     overflow: hidden;
   }
+  /* Chevron icon color based on theme */
+  #collapseIcon {
+    color: white;
+  }
+
+  [data-theme="light"] #collapseIcon {
+    color: black;
+  }
+
+  /* Analysis card conditional styles */
+  .analysis-success {
+    border: 2px solid #10b981;
+  }
+
+  .analysis-warning {
+    border: 2px solid #f59e0b;
+  }
+
+  .analysis-danger {
+    border: 2px solid #ef4444;
+  }
+
+  .analysis-header-success {
+    background: #10b981;
+    color: white;
+  }
+
+  .analysis-header-warning {
+    background: #f59e0b;
+    color: white;
+  }
+
+  .analysis-header-danger {
+    background: #ef4444;
+    color: white;
+  }
+
+  .confidence-success {
+    color: #10b981;
+  }
+
+  .confidence-warning {
+    color: #f59e0b;
+  }
+
+  .confidence-danger {
+    color: #ef4444;
+  }
 </style>
 {% endblock %} {% block content %}
 <div class="mb-4">
@@ -31,12 +79,17 @@ block extra_css %}
 <!-- Analysis Results (if just analyzed) -->
 {% if analysis_summary %}
 <div
-  class="card mb-4"
-  style="border: 2px solid {% if analysis_summary.confidence >= 70 %}#10b981{% elif analysis_summary.confidence >= 40 %}#f59e0b{% else %}#ef4444{% endif %}; background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);"
+  class="card mb-4 {% if analysis_summary.confidence >= 70 %}analysis-success{% elif analysis_summary.confidence >= 40 %}analysis-warning{% else %}analysis-danger{% endif %}"
+  style="
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.1) 0%,
+      rgba(59, 130, 246, 0.05) 100%
+    );
+  "
 >
   <div
-    class="card-header"
-    style="background: {% if analysis_summary.confidence >= 70 %}#10b981{% elif analysis_summary.confidence >= 40 %}#f59e0b{% else %}#ef4444{% endif %}; color: white;"
+    class="card-header {% if analysis_summary.confidence >= 70 %}analysis-header-success{% elif analysis_summary.confidence >= 40 %}analysis-header-warning{% else %}analysis-header-danger{% endif %}"
   >
     <h5 class="mb-0">
       <i class="fas fa-check-circle me-2"></i>Analysis Complete
@@ -57,7 +110,8 @@ block extra_css %}
       <div class="col-md-6 text-end">
         <div style="display: inline-block; text-align: center">
           <div
-            style="font-size: 3rem; font-weight: 700; color: {% if analysis_summary.confidence >= 70 %}#10b981{% elif analysis_summary.confidence >= 40 %}#f59e0b{% else %}#ef4444{% endif %};"
+            class="{% if analysis_summary.confidence >= 70 %}confidence-success{% elif analysis_summary.confidence >= 40 %}confidence-warning{% else %}confidence-danger{% endif %}"
+            style="font-size: 3rem; font-weight: 700"
           >
             {{ analysis_summary.confidence }}%
           </div>
