@@ -291,35 +291,33 @@ Cybersecurity-Incident-Response-Expert-System/
 
 ## 🗄️ Database Schema
 
-### users
+<details>
+<summary>Click to expand database tables</summary>
 
+### users
 ```sql
 id, username, email, full_name, role, is_active,
 password_hash, created_at, updated_at, last_login
 ```
 
 ### attack_types
-
 ```sql
 id, name, description, severity_level, is_active
 ```
 
 ### rules
-
 ```sql
 id, name, attack_type_id, conditions (JSON),
 actions (JSON), priority, severity_score, is_active
 ```
 
 ### alerts
-
 ```sql
 id, timestamp, source_ip, destination_ip, alert_type,
 severity, raw_data (JSON), status, created_at
 ```
 
 ### incidents
-
 ```sql
 id, alert_id, attack_type_id, matched_rules (JSON),
 recommended_actions (JSON), confidence_score, explanation,
@@ -327,11 +325,12 @@ status, assigned_to, created_at, updated_at, resolved_at
 ```
 
 ### incident_history
-
 ```sql
 id, incident_id, action_taken, notes,
 performed_by, timestamp
 ```
+
+</details>
 
 ## 🔒 Security Features
 
@@ -346,19 +345,32 @@ performed_by, timestamp
 
 The heart of the system. Analyzes alerts using:
 
-1. **Pattern Matching** - 70% condition threshold
-2. **Confidence Scoring** - Multi-factor algorithm (0-100)
-   - Base confidence: 40 points
-   - Match score: up to 30 points
-   - Priority bonus: up to 20 points
-   - Severity factor: up to 10 points
-3. **Action Prioritization** - High > Medium > Low
-4. **Explanation Generation** - Human-readable analysis
+| Component | Description |
+|-----------|-------------|
+| **Pattern Matching** | 70% condition threshold for rule activation |
+| **Confidence Scoring** | Multi-factor algorithm (0-100) |
+| **Action Prioritization** | High → Medium → Low |
+| **Explanation Generation** | Human-readable analysis |
+
+### Confidence Score Calculation
+
+```
+Base confidence:    40 points
+Match score:        up to 30 points
+Priority bonus:     up to 20 points
+Severity factor:    up to 10 points
+─────────────────────────────────
+Total:              0-100 points
+```
 
 ## 📝 Sample Usage
 
 ### Submitting a Brute Force Alert
 
+<details>
+<summary>Click to expand example</summary>
+
+**Request:**
 ```json
 {
   "failed_attempts": 10,
@@ -368,12 +380,21 @@ The heart of the system. Analyzes alerts using:
 }
 ```
 
-### Expected Result
+**Expected Result:**
+```json
+{
+  "confidence": 85,
+  "attack_type": "Brute Force",
+  "actions": [
+    "block_ip",
+    "alert_security_team",
+    "log_incident"
+  ],
+  "explanation": "Detected brute force attack based on 10 failed login attempts..."
+}
+```
 
-- **Confidence:** 85%
-- **Attack Type:** Brute Force
-- **Actions:** ["block_ip", "alert_security_team", "log_incident"]
-- **Explanation:** "Detected brute force attack based on 10 failed login attempts..."
+</details>
 
 ## 🔧 Configuration
 
@@ -391,38 +412,81 @@ Edit `config.py` to customize:
 
 ## 🐛 Troubleshooting
 
-### Database Issues
+<details>
+<summary><b>Database Issues</b></summary>
 
 ```bash
 # Delete and recreate database
-rm instance/cybersecurity.db
+rm instance/cybersecurity.db      # Linux/Mac
+del instance\cybersecurity.db     # Windows
+
+# Recreate everything
 python run.py
 python create_admin.py
 python seed_rules.py
 ```
 
-### Import Errors
+</details>
+
+<details>
+<summary><b>Import Errors</b></summary>
 
 ```bash
 # Reinstall dependencies
 pip install -r requirements.txt --force-reinstall
+
+# If still failing, recreate virtual environment
+deactivate
+rm -rf .venv      # Linux/Mac
+rmdir /s .venv    # Windows
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # Linux/Mac
+pip install -r requirements.txt
 ```
 
-### Test Failures
+</details>
+
+<details>
+<summary><b>Test Failures</b></summary>
 
 ```bash
 # Run with verbose output
 pytest -v --tb=long
+
+# Run specific test file
+pytest app/tests/test_models.py -v
+
+# Check test coverage
+pytest --cov=app --cov-report=html
 ```
+
+</details>
+
+<details>
+<summary><b>Port Already in Use</b></summary>
+
+```bash
+# Windows - Find and kill process on port 5000
+netstat -ano | findstr :5000
+taskkill /PID <PID> /F
+
+# Linux/Mac
+lsof -ti:5000 | xargs kill -9
+```
+
+</details>
 
 ## 🎓 Technologies Used
 
-- **Backend:** Flask 2.3.3
-- **Database:** SQLite + SQLAlchemy 3.1.1
-- **Forms:** Flask-WTF 1.1.1, WTForms 3.1.2
-- **Authentication:** Werkzeug 2.3.7
-- **Frontend:** Bootstrap 5, Chart.js
-- **Testing:** Pytest 7.4.0
+| Category | Technologies |
+|----------|-------------|
+| **Backend** | Flask 2.3.3, Python 3.8+ |
+| **Database** | SQLite, SQLAlchemy 3.1.1 |
+| **Forms** | Flask-WTF 1.1.1, WTForms 3.1.2 |
+| **Authentication** | Werkzeug 2.3.7 (pbkdf2:sha256) |
+| **Frontend** | Bootstrap 5, Chart.js |
+| **Testing** | Pytest 7.4.0 |
 
 ## 📊 Test Coverage
 
@@ -433,19 +497,61 @@ pytest -v --tb=long
 
 ## ✨ Key Achievements
 
-- ✅ 11 Security rules (5 Brute Force + 6 DDoS)
-- ✅ <1 second alert processing time
-- ✅ 70% pattern matching threshold
-- ✅ Multi-factor confidence scoring
-- ✅ Complete audit trail
-- ✅ Real-time dashboard with charts
-- ✅ Comprehensive test suite
-- ✅ Full RBAC implementation
+- ✅ **11 Security Rules** - 5 Brute Force + 6 DDoS detection patterns
+- ✅ **Sub-second Processing** - Alert analysis < 1 second
+- ✅ **70% Match Threshold** - Pattern matching accuracy
+- ✅ **Multi-factor Scoring** - Comprehensive confidence calculation
+- ✅ **Complete Audit Trail** - Full incident history tracking
+- ✅ **Real-time Dashboard** - Live charts with Chart.js
+- ✅ **Comprehensive Tests** - Full pytest coverage
+- ✅ **RBAC Implementation** - Three-tier access control
+
+## 📊 Test Coverage
+
+| Test Category | Coverage |
+|--------------|----------|
+| **Model Tests** | 6 models fully tested |
+| **Service Tests** | All services with edge cases |
+| **Integration Tests** | Brute Force & DDoS simulations |
+| **Edge Cases** | Empty data, inactive rules, multiple matches |
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 📞 Contact
+
+For questions or issues, please:
+- Open an issue on GitHub
+- Refer to the documentation in `CODEBASE_STRUCTURE.md`
+- Check the `PROJECT_MILESTONES.md` for detailed feature tracking
+
+## 🙏 Acknowledgments
+
+- Flask community for excellent documentation
+- Bootstrap for responsive UI components
+- Chart.js for visualization capabilities
 
 ---
 
-**Project Status:** Complete & Production Ready ✅  
-**Last Updated:** January 3, 2026  
-**Version:** 1.0.0
+<div align="center">
 
-For questions or issues, refer to the documentation in `CODEBASE_STRUCTURE.md`
+**Project Status:** ✅ Complete & Production Ready  
+**Version:** 1.0.0  
+**Last Updated:** January 10, 2026
+
+Made with ❤️ for cybersecurity incident response
+
+[⬆ Back to Top](#cybersecurity-incident-response-expert-system)
+
+</div>
