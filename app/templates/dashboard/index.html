@@ -104,13 +104,21 @@ block content %}
 <div class="card mb-4" style="border: 2px solid var(--primary-color)">
   <div
     class="card-header"
-    style="background: var(--primary-color); color: white"
+    style="background: var(--primary-color); color: white; cursor: pointer"
+    data-bs-toggle="collapse"
+    data-bs-target="#incidentAnalysisForm"
+    aria-expanded="true"
+    aria-controls="incidentAnalysisForm"
   >
-    <h5 class="mb-0">
-      <i class="fas fa-brain me-2"></i>Analyze Security Incident
-    </h5>
+    <div class="d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        <i class="fas fa-brain me-2"></i>Analyze Security Incident
+      </h5>
+      <i class="fas fa-chevron-down" id="collapseIcon"></i>
+    </div>
   </div>
-  <div class="card-body">
+  <div class="collapse show" id="incidentAnalysisForm">
+    <div class="card-body">
     <form method="POST" action="{{ url_for('dashboard.index') }}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
 
@@ -212,9 +220,21 @@ block content %}
       </button>
     </form>
   </div>
+  </div>
 </div>
 
 <script>
+  // Toggle chevron icon on collapse
+  document.getElementById('incidentAnalysisForm').addEventListener('show.bs.collapse', function () {
+    document.getElementById('collapseIcon').classList.remove('fa-chevron-down');
+    document.getElementById('collapseIcon').classList.add('fa-chevron-up');
+  });
+  
+  document.getElementById('incidentAnalysisForm').addEventListener('hide.bs.collapse', function () {
+    document.getElementById('collapseIcon').classList.remove('fa-chevron-up');
+    document.getElementById('collapseIcon').classList.add('fa-chevron-down');
+  });
+
   function loadBruteForce() {
     document.getElementById("source_ip").value = "192.168.1.100";
     document.getElementById("severity").value = "high";

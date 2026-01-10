@@ -1,6 +1,6 @@
 import re
 from flask_wtf import FlaskForm
-from wtforms import BooleanField, StringField, SubmitField, PasswordField
+from wtforms import BooleanField, StringField, SubmitField, PasswordField, SelectField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, ValidationError
 
 from app.models import User
@@ -46,11 +46,14 @@ class UserCreateForm(FlaskForm):
         validators=[DataRequired(), Length(min=1, max=120)],
         render_kw={"placeholder": "Enter full name"},
     )
-    role = StringField(
+    role = SelectField(
         "Role",
+        choices=[
+            ('admin', 'Administrator'),
+            ('analyst', 'Security Analyst'),
+            ('viewer', 'Viewer')
+        ],
         validators=[DataRequired()],
-        default="analyst",
-        render_kw={"placeholder": "admin, analyst, or viewer"},
     )
     is_active = BooleanField("Active", default=True)
 
@@ -105,8 +108,13 @@ class UserEditForm(FlaskForm):
         "Full name",
         validators=[DataRequired(), Length(min=1, max=120)],
     )
-    role = StringField(
+    role = SelectField(
         "Role",
+        choices=[
+            ('admin', 'Administrator'),
+            ('analyst', 'Security Analyst'),
+            ('viewer', 'Viewer')
+        ],
         validators=[DataRequired()],
     )
     is_active = BooleanField("Active")

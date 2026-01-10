@@ -3,9 +3,19 @@ Details{% endblock %} {% block content %}
 <div class="container mt-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-shield-exclamation"></i> Alert #{{ alert.id }}</h2>
-    <div>
-      <a href="{{ url_for('alerts.index') }}" class="btn btn-secondary">
-        <i class="bi bi-arrow-left"></i> Back to List
+    <div class="d-flex gap-3">
+      <a
+        href="{{ url_for('alerts.index') }}"
+        class="btn btn-outline-secondary"
+        style="
+          border-radius: 10px;
+          padding: 0.65rem 1.5rem;
+          font-weight: 500;
+          border-width: 2px;
+          transition: all 0.3s ease;
+        "
+      >
+        <i class="fas fa-arrow-left me-2"></i>Back to List
       </a>
       {% if session.user_role in ['admin', 'analyst'] %}
       <form
@@ -14,13 +24,216 @@ Details{% endblock %} {% block content %}
         style="display: inline"
       >
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-        <button type="submit" class="btn btn-warning">
-          <i class="bi bi-arrow-repeat"></i> Re-Analyze
+        <button
+          type="submit"
+          class="btn btn-outline-warning"
+          style="
+            border-radius: 10px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 500;
+            border-width: 2px;
+            transition: all 0.3s ease;
+          "
+        >
+          <i class="fas fa-sync-alt me-2"></i>Re-Analyze
         </button>
       </form>
-      {% endif %}
+      {% if alert.status != 'ignored' %}
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+        style="
+          border-radius: 10px;
+          padding: 0.65rem 1.5rem;
+          font-weight: 500;
+          border-width: 2px;
+          transition: all 0.3s ease;
+        "
+        onclick="showIgnoreModal()"
+      >
+        <i class="fas fa-ban me-2"></i>Ignore Alert
+      </button>
+      {% else %}
+      <form
+        method="POST"
+        action="{{ url_for('alerts.unignore', alert_id=alert.id) }}"
+        style="display: inline"
+      >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button
+          type="submit"
+          class="btn btn-outline-success"
+          style="
+            border-radius: 10px;
+            padding: 0.65rem 1.5rem;
+            font-weight: 500;
+            border-width: 2px;
+            transition: all 0.3s ease;
+          "
+        >
+          <i class="fas fa-check-circle me-2"></i>Restore Alert
+        </button>
+      </form>
+      {% endif %} {% endif %}
     </div>
   </div>
+
+  <!-- Custom Ignore Confirmation Modal -->
+  <div
+    id="ignoreModal"
+    style="
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    "
+  >
+    <div
+      style="
+        background: var(--card-bg);
+        border-radius: 16px;
+        padding: 0;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        overflow: hidden;
+      "
+    >
+      <!-- Modal Header -->
+      <div
+        style="
+          background: linear-gradient(
+            135deg,
+            rgba(220, 53, 69, 0.1),
+            rgba(220, 53, 69, 0.05)
+          );
+          padding: 1.5rem;
+          border-bottom: 2px solid rgba(220, 53, 69, 0.2);
+        "
+      >
+        <div style="display: flex; align-items: center; gap: 12px">
+          <div
+            style="
+              width: 48px;
+              height: 48px;
+              border-radius: 50%;
+              background: rgba(220, 53, 69, 0.15);
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <i
+              class="fas fa-exclamation-triangle"
+              style="font-size: 1.5rem; color: #dc3545"
+            ></i>
+          </div>
+          <div>
+            <h5 style="margin: 0; color: var(--text-primary); font-weight: 700">
+              Ignore Alert
+            </h5>
+            <p
+              style="margin: 0; color: var(--text-secondary); font-size: 0.9rem"
+            >
+              Alert #{{ alert.id }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div style="padding: 1.5rem">
+        <p
+          style="
+            color: var(--text-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+          "
+        >
+          Are you sure you want to mark this alert as
+          <strong style="color: #dc3545">ignored</strong>? This action will
+          remove it from active monitoring and move it to the ignored alerts
+          list.
+        </p>
+      </div>
+
+      <!-- Modal Footer -->
+      <div
+        style="
+          padding: 1rem 1.5rem;
+          background: rgba(108, 117, 125, 0.05);
+          border-top: 1px solid var(--card-border);
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+        "
+      >
+        <button
+          type="button"
+          onclick="hideIgnoreModal()"
+          class="btn btn-outline-secondary"
+          style="border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 500"
+        >
+          <i class="fas fa-times me-2"></i>Cancel
+        </button>
+        <form
+          method="POST"
+          action="{{ url_for('alerts.ignore', alert_id=alert.id) }}"
+          style="display: inline; margin: 0"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button
+            type="submit"
+            class="btn btn-danger"
+            style="
+              border-radius: 8px;
+              padding: 0.65rem 1.5rem;
+              font-weight: 500;
+            "
+          >
+            <i class="fas fa-ban me-2"></i>Yes, Ignore Alert
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showIgnoreModal() {
+      const modal = document.getElementById("ignoreModal");
+      modal.style.display = "flex";
+      document.body.style.overflow = "hidden";
+    }
+
+    function hideIgnoreModal() {
+      const modal = document.getElementById("ignoreModal");
+      modal.style.display = "none";
+      document.body.style.overflow = "auto";
+    }
+
+    // Close modal when clicking outside
+    document
+      .getElementById("ignoreModal")
+      ?.addEventListener("click", function (e) {
+        if (e.target === this) {
+          hideIgnoreModal();
+        }
+      });
+
+    // Close modal with Escape key
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        hideIgnoreModal();
+      }
+    });
+  </script>
 
   <div class="row">
     <!-- Alert Details Card -->

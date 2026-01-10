@@ -151,3 +151,43 @@ def analyze(alert_id: int):
         flash(f'Error analyzing alert: {str(e)}', 'danger')
     
     return redirect(url_for('alerts.detail', alert_id=alert_id))
+
+
+@alert_bp.route('/<int:alert_id>/ignore', methods=['POST'])
+@role_required('admin', 'analyst')
+def ignore(alert_id: int):
+    """Mark an alert as ignored"""
+    alert = AlertService.get_by_id(alert_id)
+    if not alert:
+        flash('Alert not found.', 'danger')
+        return redirect(url_for('alerts.index'))
+    
+    try:
+        alert.status = 'ignored'
+        db.session.commit()
+        flash('Alert marked as ignored.', 'info')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error ignoring alert: {str(e)}', 'danger')
+    
+    return redirect(url_for('alerts.detail', alert_id=alert_id))
+
+
+@alert_bp.route('/<int:alert_id>/unignore', methods=['POST'])
+@role_required('admin', 'analyst')
+def unignore(alert_id: int):
+    """Restore an ignored alert back to processed status"""
+    alert = AlertService.get_by_id(alert_id)
+    if not alert:
+        flash('Alert not found.', 'danger')
+        return redirect(url_for('alerts.index'))
+    
+    try:
+        alert.status = 'processed'
+        db.session.commit()
+        flash('Alert restored to processed status.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error restoring alert: {str(e)}', 'danger')
+    
+    return redirect(url_for('alerts.detail', alert_id=alert_id))

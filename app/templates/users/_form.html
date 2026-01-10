@@ -1,81 +1,280 @@
 {{ form.hidden_tag() }}
 
-<div class="mb-3">
-  {{ form.username.label(class="form-label") }} {{
-  form.username(class="form-control") }} {% if form.username.errors %}
-  <div class="text-danger small">
-    {% for error in form.username.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-</div>
-
-<div class="mb-3">
-  {{ form.email.label(class="form-label") }} {{ form.email(class="form-control")
-  }} {% if form.email.errors %}
-  <div class="text-danger small">
-    {% for error in form.email.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-</div>
-
-<div class="mb-3">
-  {{ form.full_name.label(class="form-label") }} {{
-  form.full_name(class="form-control") }} {% if form.full_name.errors %}
-  <div class="text-danger small">
-    {% for error in form.full_name.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-</div>
-
-<div class="mb-3">
-  {{ form.role.label(class="form-label") }} {{ form.role(class="form-control")
-  }} {% if form.role.errors %}
-  <div class="text-danger small">
-    {% for error in form.role.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-  <small class="form-text text-muted">Enter: admin, analyst, or viewer</small>
-</div>
-
-<div class="form-check mb-3">
-  {{ form.is_active(class="form-check-input") }} {{
-  form.is_active.label(class="form-check-label") }}
-</div>
-
-<div class="mb-3">
-  {{ form.password.label(class="form-label") }} {{
-  form.password(class="form-control") }} {% if form.password.errors %}
-  <div class="text-danger small">
-    {% for error in form.password.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-</div>
-
-<div class="mb-3">
-  {{ form.confirm_password.label(class="form-label") }} {{
-  form.confirm_password(class="form-control") }} {% if
-  form.confirm_password.errors %}
-  <div class="text-danger small">
-    {% for error in form.confirm_password.errors %}
-    <div>{{ error }}</div>
-    {% endfor %}
-  </div>
-  {% endif %}
-</div>
-
-<div class="mt-4">
-  {{ form.submit(class="btn btn-primary") }}
-  <a href="{{ url_for('users.index') }}" class="btn btn-outline-secondary"
-    >Cancel</a
+<!-- Basic Information Section -->
+<div class="mb-4">
+  <h6
+    class="mb-3"
+    style="
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    "
   >
+    <i class="fas fa-user me-2" style="color: #0d6efd"></i>Basic Information
+  </h6>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label
+        class="form-label"
+        style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+      >
+        <i
+          class="fas fa-id-badge me-2"
+          style="font-size: 0.9rem; color: var(--text-secondary)"
+        ></i
+        >Username
+      </label>
+      {{ form.username(class="form-control", style="border-radius: 8px; padding:
+      0.65rem 1rem; border: 1px solid var(--card-border); background:
+      var(--darker-bg);", placeholder="Enter username") }} {% if
+      form.username.errors %}
+      <div class="text-danger small mt-2">
+        {% for error in form.username.errors %}
+        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label
+        class="form-label"
+        style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+      >
+        <i
+          class="fas fa-envelope me-2"
+          style="font-size: 0.9rem; color: var(--text-secondary)"
+        ></i
+        >Email Address
+      </label>
+      {{ form.email(class="form-control", style="border-radius: 8px; padding:
+      0.65rem 1rem; border: 1px solid var(--card-border); background:
+      var(--darker-bg);", placeholder="user@example.com") }} {% if
+      form.email.errors %}
+      <div class="text-danger small mt-2">
+        {% for error in form.email.errors %}
+        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mb-3">
+    <label
+      class="form-label"
+      style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+    >
+      <i
+        class="fas fa-signature me-2"
+        style="font-size: 0.9rem; color: var(--text-secondary)"
+      ></i
+      >Full Name
+    </label>
+    {{ form.full_name(class="form-control", style="border-radius: 8px; padding:
+    0.65rem 1rem; border: 1px solid var(--card-border); background:
+    var(--darker-bg);", placeholder="Enter full name") }} {% if
+    form.full_name.errors %}
+    <div class="text-danger small mt-2">
+      {% for error in form.full_name.errors %}
+      <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Role & Status Section -->
+<div class="mb-4">
+  <h6
+    class="mb-3"
+    style="
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    "
+  >
+    <i class="fas fa-shield-alt me-2" style="color: #0d6efd"></i>Role & Status
+  </h6>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label
+        class="form-label"
+        style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+      >
+        <i
+          class="fas fa-user-tag me-2"
+          style="font-size: 0.9rem; color: var(--text-secondary)"
+        ></i
+        >User Role
+      </label>
+      {{ form.role(class="form-select", style="border-radius: 8px; padding:
+      0.65rem 1rem; border: 1px solid var(--card-border); background:
+      var(--darker-bg);") }} {% if form.role.errors %}
+      <div class="text-danger small mt-2">
+        {% for error in form.role.errors %}
+        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <small
+        class="form-text"
+        style="color: var(--text-muted); display: block; margin-top: 6px"
+      >
+        <i class="fas fa-info-circle me-1"></i>Determines user permissions and
+        access level
+      </small>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label
+        class="form-label"
+        style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+      >
+        <i
+          class="fas fa-toggle-on me-2"
+          style="font-size: 0.9rem; color: var(--text-secondary)"
+        ></i
+        >Account Status
+      </label>
+      <div
+        style="
+          padding: 0.65rem 1rem;
+          background: rgba(13, 110, 253, 0.05);
+          border-radius: 8px;
+          border: 1px solid rgba(13, 110, 253, 0.15);
+        "
+      >
+        <div class="form-check">
+          {{ form.is_active(class="form-check-input", style="width: 1.2em;
+          height: 1.2em;") }}
+          <label
+            class="form-check-label"
+            style="
+              font-weight: 500;
+              color: var(--text-primary);
+              margin-left: 8px;
+            "
+          >
+            Active Account
+          </label>
+        </div>
+        <small
+          class="form-text"
+          style="
+            color: var(--text-muted);
+            display: block;
+            margin-top: 4px;
+            margin-left: 32px;
+          "
+        >
+          <i class="fas fa-check-circle me-1" style="color: #198754"></i>User
+          can log in and access the system
+        </small>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Security Section -->
+<div class="mb-4">
+  <h6
+    class="mb-3"
+    style="
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 8px;
+    "
+  >
+    <i class="fas fa-lock me-2" style="color: #0d6efd"></i>Security Credentials
+  </h6>
+
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label
+        class="form-label"
+        style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+      >
+        <i
+          class="fas fa-key me-2"
+          style="font-size: 0.9rem; color: var(--text-secondary)"
+        ></i
+        >Password
+      </label>
+      {{ form.password(class="form-control", style="border-radius: 8px; padding:
+      0.65rem 1rem; border: 1px solid var(--card-border); background:
+      var(--darker-bg);", placeholder="Enter secure password") }} {% if
+      form.password.errors %}
+      <div class="text-danger small mt-2">
+        {% for error in form.password.errors %}
+        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <small
+        class="form-text"
+        style="color: var(--text-muted); display: block; margin-top: 6px"
+      >
+        <i class="fas fa-shield-alt me-1"></i>Minimum 8 characters recommended
+      </small>
+    </div>
+
+    <div class="col-md-6 mb-3">
+      <label
+        class="form-label"
+        style="font-weight: 500; color: var(--text-primary); margin-bottom: 8px"
+      >
+        <i
+          class="fas fa-check-double me-2"
+          style="font-size: 0.9rem; color: var(--text-secondary)"
+        ></i
+        >Confirm Password
+      </label>
+      {{ form.confirm_password(class="form-control", style="border-radius: 8px;
+      padding: 0.65rem 1rem; border: 1px solid var(--card-border); background:
+      var(--darker-bg);", placeholder="Re-enter password") }} {% if
+      form.confirm_password.errors %}
+      <div class="text-danger small mt-2">
+        {% for error in form.confirm_password.errors %}
+        <div><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <small
+        class="form-text"
+        style="color: var(--text-muted); display: block; margin-top: 6px"
+      >
+        <i class="fas fa-sync-alt me-1"></i>Must match the password above
+      </small>
+    </div>
+  </div>
+</div>
+
+<!-- Action Buttons -->
+<div class="mt-5 pt-3" style="border-top: 1px solid var(--card-border)">
+  <div class="d-flex gap-3 justify-content-end">
+    <a
+      href="{{ url_for('users.index') }}"
+      class="btn btn-outline-secondary"
+      style="border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 500"
+    >
+      <i class="fas fa-times me-2"></i>Cancel
+    </a>
+    {{ form.submit(class="btn btn-primary", style="border-radius: 8px; padding:
+    0.65rem 2rem; font-weight: 500;") }}
+  </div>
 </div>

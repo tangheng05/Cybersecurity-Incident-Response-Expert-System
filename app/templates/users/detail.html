@@ -1,38 +1,555 @@
-{% extends "layouts/base.html" %}
-{% block title %}User {{ user.username }}{% endblock %}
+{% extends "layouts/base.html" %} {% block title %}User {{ user.username }}{%
+endblock %} {% block extra_css %}
+<style>
+  .status-box-active {
+    padding: 16px 20px;
+    border-radius: 8px;
+    background: linear-gradient(
+      135deg,
+      rgba(25, 135, 84, 0.1),
+      rgba(25, 135, 84, 0.05)
+    );
+    border-left: 3px solid #198754;
+  }
 
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h1 class="mb-0">User Detail</h1>
-    <div>
-        <a href="{{ url_for('users.edit', user_id=user.id) }}" class="btn btn-sm btn-outline-secondary">Edit</a>
-        <a href="{{ url_for('users.index') }}" class="btn btn-sm btn-outline-primary">Back to list</a>
+  .status-box-inactive {
+    padding: 16px 20px;
+    border-radius: 8px;
+    background: linear-gradient(
+      135deg,
+      rgba(108, 117, 125, 0.1),
+      rgba(108, 117, 125, 0.05)
+    );
+    border-left: 3px solid #6c757d;
+  }
+</style>
+{% endblock %} {% block content %}
+
+<!-- Page Header -->
+<div class="mb-5">
+  <div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center gap-3">
+      <div
+        style="
+          width: 70px;
+          height: 70px;
+          border-radius: 50%;
+          background: linear-gradient(
+            135deg,
+            rgba(13, 110, 253, 0.2),
+            rgba(13, 110, 253, 0.1)
+          );
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 2rem;
+          color: #0d6efd;
+          border: 3px solid rgba(13, 110, 253, 0.3);
+        "
+      >
+        {{ user.username[0]|upper }}
+      </div>
+      <div>
+        <h1
+          class="h2 mb-1"
+          style="font-weight: 700; color: var(--text-primary)"
+        >
+          {{ user.full_name or user.username }}
+        </h1>
+        <p class="mb-0" style="color: var(--text-secondary); font-size: 1rem">
+          <i class="fas fa-at me-1"></i>{{ user.username }} {% if user.role ==
+          'admin' %}
+          <span
+            class="badge bg-danger ms-2"
+            style="font-size: 0.75rem; padding: 5px 10px"
+          >
+            <i class="fas fa-shield-alt me-1"></i>ADMIN
+          </span>
+          {% elif user.role == 'analyst' %}
+          <span
+            class="badge bg-warning ms-2"
+            style="font-size: 0.75rem; padding: 5px 10px"
+          >
+            <i class="fas fa-user-shield me-1"></i>ANALYST
+          </span>
+          {% else %}
+          <span
+            class="badge bg-info ms-2"
+            style="font-size: 0.75rem; padding: 5px 10px"
+          >
+            <i class="fas fa-eye me-1"></i>VIEWER
+          </span>
+          {% endif %}
+        </p>
+      </div>
     </div>
+    <div class="d-flex gap-2">
+      <a
+        href="{{ url_for('users.edit', user_id=user.id) }}"
+        class="btn btn-warning"
+        style="border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 500"
+      >
+        <i class="fas fa-edit me-2"></i>Edit User
+      </a>
+      <a
+        href="{{ url_for('users.index') }}"
+        class="btn btn-outline-secondary"
+        style="border-radius: 8px; padding: 0.6rem 1.2rem; font-weight: 500"
+      >
+        <i class="fas fa-arrow-left me-2"></i>Back to List
+      </a>
+    </div>
+  </div>
 </div>
 
-<dl class="row">
-    <dt class="col-sm-3">Username</dt>
-    <dd class="col-sm-9">{{ user.username }}</dd>
+<div class="row g-4">
+  <!-- User Information Card -->
+  <div class="col-lg-6">
+    <div
+      class="card h-100"
+      style="
+        border-radius: 12px;
+        border: none;
+        background: var(--card-bg);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      "
+    >
+      <div
+        class="card-header"
+        style="
+          background: linear-gradient(
+            135deg,
+            rgba(13, 110, 253, 0.08),
+            rgba(13, 110, 253, 0.03)
+          );
+          border-bottom: 2px solid rgba(13, 110, 253, 0.2);
+          padding: 1.25rem 1.5rem;
+          border: none;
+        "
+      >
+        <h5 class="mb-0" style="font-weight: 600; color: var(--text-primary)">
+          <i class="fas fa-user-circle me-2" style="color: #0d6efd"></i>User
+          Information
+        </h5>
+      </div>
+      <div class="card-body" style="padding: 1.5rem">
+        <div class="mb-4">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i class="fas fa-id-badge me-2" style="color: var(--text-muted)"></i
+            >Username
+          </label>
+          <div
+            style="
+              padding: 12px 16px;
+              background: rgba(13, 110, 253, 0.05);
+              border-radius: 8px;
+              border-left: 3px solid #0d6efd;
+            "
+          >
+            <span
+              style="
+                font-weight: 600;
+                color: var(--text-primary);
+                font-size: 1.1rem;
+              "
+              >{{ user.username }}</span
+            >
+          </div>
+        </div>
 
-    <dt class="col-sm-3">Full name</dt>
-    <dd class="col-sm-9">{{ user.full_name }}</dd>
+        <div class="mb-4">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i
+              class="fas fa-signature me-2"
+              style="color: var(--text-muted)"
+            ></i
+            >Full Name
+          </label>
+          <div
+            style="
+              padding: 12px 16px;
+              background: rgba(13, 110, 253, 0.05);
+              border-radius: 8px;
+              border-left: 3px solid #0d6efd;
+            "
+          >
+            <span
+              style="
+                font-weight: 500;
+                color: var(--text-primary);
+                font-size: 1.05rem;
+              "
+              >{{ user.full_name or 'N/A' }}</span
+            >
+          </div>
+        </div>
 
-    <dt class="col-sm-3">Email</dt>
-    <dd class="col-sm-9">{{ user.email }}</dd>
+        <div class="mb-4">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i class="fas fa-envelope me-2" style="color: var(--text-muted)"></i
+            >Email Address
+          </label>
+          <div
+            style="
+              padding: 12px 16px;
+              background: rgba(13, 110, 253, 0.05);
+              border-radius: 8px;
+              border-left: 3px solid #0d6efd;
+            "
+          >
+            <code
+              style="
+                background: transparent;
+                padding: 0;
+                font-size: 1rem;
+                color: #0d6efd;
+              "
+              >{{ user.email }}</code
+            >
+          </div>
+        </div>
 
-    <dt class="col-sm-3">Status</dt>
-    <dd class="col-sm-9">
-        {% if user.is_active %}
-        <span class="badge text-bg-success">Active</span>
-        {% else %}
-        <span class="badge text-bg-secondary">Inactive</span>
-        {% endif %}
-    </dd>
+        <div class="mb-0">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i class="fas fa-user-tag me-2" style="color: var(--text-muted)"></i
+            >Role
+          </label>
+          <div
+            style="
+              padding: 12px 16px;
+              background: rgba(13, 110, 253, 0.05);
+              border-radius: 8px;
+              border-left: 3px solid #0d6efd;
+            "
+          >
+            {% if user.role == 'admin' %}
+            <span
+              class="badge bg-danger"
+              style="font-size: 0.9rem; padding: 8px 16px; border-radius: 6px"
+            >
+              <i class="fas fa-shield-alt me-2"></i>Administrator
+            </span>
+            <small class="d-block mt-2" style="color: var(--text-secondary)"
+              >Full system access with all permissions</small
+            >
+            {% elif user.role == 'analyst' %}
+            <span
+              class="badge bg-warning"
+              style="font-size: 0.9rem; padding: 8px 16px; border-radius: 6px"
+            >
+              <i class="fas fa-user-shield me-2"></i>Security Analyst
+            </span>
+            <small class="d-block mt-2" style="color: var(--text-secondary)"
+              >Manage security content and analyze threats</small
+            >
+            {% else %}
+            <span
+              class="badge bg-info"
+              style="font-size: 0.9rem; padding: 8px 16px; border-radius: 6px"
+            >
+              <i class="fas fa-eye me-2"></i>Operator / Viewer
+            </span>
+            <small class="d-block mt-2" style="color: var(--text-secondary)"
+              >Read-only access to security data</small
+            >
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <dt class="col-sm-3">Created at</dt>
-    <dd class="col-sm-9">{{ user.created_at }}</dd>
+  <!-- Account Status & Timestamps Card -->
+  <div class="col-lg-6">
+    <div
+      class="card h-100"
+      style="
+        border-radius: 12px;
+        border: none;
+        background: var(--card-bg);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        overflow: hidden;
+      "
+    >
+      <div
+        class="card-header"
+        style="
+          background: linear-gradient(
+            135deg,
+            rgba(25, 135, 84, 0.08),
+            rgba(25, 135, 84, 0.03)
+          );
+          border-bottom: 2px solid rgba(25, 135, 84, 0.2);
+          padding: 1.25rem 1.5rem;
+          border: none;
+        "
+      >
+        <h5 class="mb-0" style="font-weight: 600; color: var(--text-primary)">
+          <i class="fas fa-info-circle me-2" style="color: #198754"></i>Account
+          Status & Activity
+        </h5>
+      </div>
+      <div class="card-body" style="padding: 1.5rem">
+        <!-- Account Status -->
+        <div class="mb-4">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i
+              class="fas fa-toggle-on me-2"
+              style="color: var(--text-muted)"
+            ></i
+            >Account Status
+          </label>
+          <div
+            class="{% if user.is_active %}status-box-active{% else %}status-box-inactive{% endif %}"
+          >
+            {% if user.is_active %}
+            <div class="d-flex align-items-center gap-3">
+              <div
+                style="
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background: rgba(25, 135, 84, 0.15);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <i
+                  class="fas fa-check-circle"
+                  style="font-size: 1.3rem; color: #198754"
+                ></i>
+              </div>
+              <div>
+                <span
+                  class="badge bg-success"
+                  style="
+                    font-size: 0.85rem;
+                    padding: 6px 12px;
+                    border-radius: 6px;
+                    margin-bottom: 4px;
+                  "
+                  >Active</span
+                >
+                <small class="d-block" style="color: var(--text-secondary)"
+                  >User can log in and access the system</small
+                >
+              </div>
+            </div>
+            {% else %}
+            <div class="d-flex align-items-center gap-3">
+              <div
+                style="
+                  width: 40px;
+                  height: 40px;
+                  border-radius: 50%;
+                  background: rgba(108, 117, 125, 0.15);
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <i
+                  class="fas fa-times-circle"
+                  style="font-size: 1.3rem; color: #6c757d"
+                ></i>
+              </div>
+              <div>
+                <span
+                  class="badge bg-secondary"
+                  style="
+                    font-size: 0.85rem;
+                    padding: 6px 12px;
+                    border-radius: 6px;
+                    margin-bottom: 4px;
+                  "
+                  >Inactive</span
+                >
+                <small class="d-block" style="color: var(--text-secondary)"
+                  >User cannot access the system</small
+                >
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
 
-    <dt class="col-sm-3">Last updated</dt>
-    <dd class="col-sm-9">{{ user.updated_at }}</dd>
-</dl>
+        <!-- Created Date -->
+        <div class="mb-4">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i
+              class="fas fa-calendar-plus me-2"
+              style="color: var(--text-muted)"
+            ></i
+            >Account Created
+          </label>
+          <div
+            style="
+              padding: 12px 16px;
+              background: rgba(25, 135, 84, 0.05);
+              border-radius: 8px;
+              border-left: 3px solid #198754;
+            "
+          >
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-clock" style="color: #198754"></i>
+              <span style="font-weight: 500; color: var(--text-primary)"
+                >{{ user.created_at.strftime('%B %d, %Y at %I:%M %p') }}</span
+              >
+            </div>
+          </div>
+        </div>
+
+        <!-- Last Updated -->
+        <div class="mb-0">
+          <label
+            class="text-uppercase"
+            style="
+              font-size: 0.75rem;
+              font-weight: 600;
+              color: var(--text-secondary);
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: block;
+            "
+          >
+            <i class="fas fa-sync-alt me-2" style="color: var(--text-muted)"></i
+            >Last Updated
+          </label>
+          <div
+            style="
+              padding: 12px 16px;
+              background: rgba(25, 135, 84, 0.05);
+              border-radius: 8px;
+              border-left: 3px solid #198754;
+            "
+          >
+            <div class="d-flex align-items-center gap-2">
+              <i class="fas fa-clock" style="color: #198754"></i>
+              <span style="font-weight: 500; color: var(--text-primary)"
+                >{{ user.updated_at.strftime('%B %d, %Y at %I:%M %p') }}</span
+              >
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Actions Card -->
+<div
+  class="card mt-4"
+  style="
+    border-radius: 12px;
+    border: none;
+    background: var(--card-bg);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  "
+>
+  <div
+    class="card-header"
+    style="
+      background: linear-gradient(
+        135deg,
+        rgba(220, 53, 69, 0.08),
+        rgba(220, 53, 69, 0.03)
+      );
+      border-bottom: 2px solid rgba(220, 53, 69, 0.2);
+      padding: 1.25rem 1.5rem;
+      border: none;
+    "
+  >
+    <h5 class="mb-0" style="font-weight: 600; color: var(--text-primary)">
+      <i class="fas fa-cog me-2" style="color: #dc3545"></i>Account Actions
+    </h5>
+  </div>
+  <div class="card-body" style="padding: 1.5rem">
+    <div class="d-flex gap-3">
+      <a
+        href="{{ url_for('users.edit', user_id=user.id) }}"
+        class="btn btn-warning"
+        style="
+          border-radius: 8px;
+          padding: 0.65rem 1.5rem;
+          font-weight: 500;
+          flex: 1;
+        "
+      >
+        <i class="fas fa-edit me-2"></i>Edit User Details
+      </a>
+      <a
+        href="{{ url_for('users.delete_confirm', user_id=user.id) }}"
+        class="btn btn-outline-danger"
+        style="border-radius: 8px; padding: 0.65rem 1.5rem; font-weight: 500"
+      >
+        <i class="fas fa-trash-alt me-2"></i>Delete User
+      </a>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
