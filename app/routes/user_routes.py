@@ -5,6 +5,7 @@ from flask import (
     url_for,
     flash,
     abort,
+    session,
 )
 
 from app.forms.user_forms import UserCreateForm, UserEditForm, ConfirmDeleteForm
@@ -69,7 +70,21 @@ def edit(user_id: int):
         }
         password = form.password.data or None
         UserService.update(user, data, password)
-        flash(f"User '{user.username}' was updated successfully.", "success")
+        
+        # Update session if the edited user is the currently logged-in user
+        if session.get('user_id') == user_id:
+            session['user_role'] = user.role
+            session['username'] = user.username
+            flash(f"Your profile was updated successfully. Your new role is '{user.role}'.", "success")
+            
+            # If user is no longer active or no longer admin, redirect to dashboard
+            if not user.is_active:
+                session.clear()
+                flash("Your account has been deactivated. Please contact an administrator.", "warning")
+                return redirect(url_for('auth.login'))
+        else:
+            flash(f"User '{user.username}' was updated successfully.", "success")
+        
         return redirect(url_for("users.detail", user_id=user.id))
 
     return render_template("users/edit.html", form=form, user=user)

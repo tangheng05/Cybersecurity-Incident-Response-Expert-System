@@ -21,7 +21,20 @@ def admin_required(f):
             flash('Please log in to access this page.', 'warning')
             return redirect(url_for('auth.login'))
         
-        if session.get('user_role') != 'admin':
+        # Get fresh user data from database to ensure role is current
+        from app.models.user import User
+        user = User.query.get(session.get('user_id'))
+        
+        if not user or not user.is_active:
+            session.clear()
+            flash('Your account is no longer active. Please contact an administrator.', 'warning')
+            return redirect(url_for('auth.login'))
+        
+        # Update session with current role
+        if session.get('user_role') != user.role:
+            session['user_role'] = user.role
+        
+        if user.role != 'admin':
             flash('You do not have permission to access this page.', 'danger')
             abort(403)
         
@@ -38,8 +51,20 @@ def role_required(*roles):
                 flash('Please log in to access this page.', 'warning')
                 return redirect(url_for('auth.login'))
             
-            user_role = session.get('user_role')
-            if user_role not in roles:
+            # Get fresh user data from database to ensure role is current
+            from app.models.user import User
+            user = User.query.get(session.get('user_id'))
+            
+            if not user or not user.is_active:
+                session.clear()
+                flash('Your account is no longer active. Please contact an administrator.', 'warning')
+                return redirect(url_for('auth.login'))
+            
+            # Update session with current role
+            if session.get('user_role') != user.role:
+                session['user_role'] = user.role
+            
+            if user.role not in roles:
                 flash('You do not have permission to access this page.', 'danger')
                 abort(403)
             

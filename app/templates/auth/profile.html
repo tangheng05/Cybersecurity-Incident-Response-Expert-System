@@ -1,0 +1,151 @@
+{% extends "layouts/base.html" %} {% block title %}My Profile - Cybersecurity
+IRS{% endblock %} {% block content %}
+<div class="row justify-content-center mt-4">
+  <div class="col-lg-8">
+    <div class="card">
+      <div class="card-header">
+        <h4 class="mb-0"><i class="fas fa-user-circle me-2"></i>My Profile</h4>
+      </div>
+      <div class="card-body">
+        <form method="POST">
+          {{ form.hidden_tag() }}
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.username.label(class="form-label") }} {{
+                form.username(class="form-control" + (" is-invalid" if
+                form.username.errors else "")) }} {% if form.username.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.username.errors %} {{ error }} {% endfor
+                  %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.email.label(class="form-label") }} {{
+                form.email(class="form-control" + (" is-invalid" if
+                form.email.errors else "")) }} {% if form.email.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.email.errors %} {{ error }} {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            {{ form.full_name.label(class="form-label") }} {{
+            form.full_name(class="form-control" + (" is-invalid" if
+            form.full_name.errors else "")) }} {% if form.full_name.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.full_name.errors %} {{ error }} {% endfor %}
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Current Role</label>
+            <div>
+              <span
+                class="badge bg-{% if user.role == 'admin' %}danger{% elif user.role == 'analyst' %}warning{% else %}info{% endif %} fs-6"
+              >
+                {{ user.role|upper }}
+              </span>
+              <small class="text-muted ms-2">
+                <i class="fas fa-info-circle"></i>
+                Contact an administrator to change your role
+              </small>
+            </div>
+          </div>
+
+          <hr class="my-4" />
+
+          <h5 class="mb-3"><i class="fas fa-lock me-2"></i>Change Password</h5>
+          <p class="text-muted small mb-3">
+            Leave the password fields blank if you don't want to change your
+            password.
+          </p>
+
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.password.label(class="form-label") }} {{
+                form.password(class="form-control" + (" is-invalid" if
+                form.password.errors else "")) }} {% if form.password.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.password.errors %} {{ error }} {% endfor
+                  %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                {{ form.confirm_password.label(class="form-label") }} {{
+                form.confirm_password(class="form-control" + (" is-invalid" if
+                form.confirm_password.errors else "")) }} {% if
+                form.confirm_password.errors %}
+                <div class="invalid-feedback">
+                  {% for error in form.confirm_password.errors %} {{ error }} {%
+                  endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-between align-items-center mt-4">
+            <a
+              href="{{ url_for('dashboard.index') }}"
+              class="btn btn-outline-primary"
+            >
+              <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
+            {{ form.submit(class="btn btn-primary") }}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="card mt-4">
+      <div class="card-header">
+        <h5 class="mb-0">
+          <i class="fas fa-info-circle me-2"></i>Account Information
+        </h5>
+      </div>
+      <div class="card-body">
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Account Created</dt>
+          <dd class="col-sm-8">
+            {{ user.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+          </dd>
+
+          <dt class="col-sm-4">Last Updated</dt>
+          <dd class="col-sm-8">
+            {{ user.updated_at.strftime('%B %d, %Y at %I:%M %p') }}
+          </dd>
+
+          {% if user.last_login %}
+          <dt class="col-sm-4">Last Login</dt>
+          <dd class="col-sm-8">
+            {{ user.last_login.strftime('%B %d, %Y at %I:%M %p') }}
+          </dd>
+          {% endif %}
+
+          <dt class="col-sm-4">Account Status</dt>
+          <dd class="col-sm-8">
+            <span
+              class="badge bg-{% if user.is_active %}success{% else %}danger{% endif %}"
+            >
+              {{ 'Active' if user.is_active else 'Inactive' }}
+            </span>
+          </dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

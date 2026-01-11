@@ -34,6 +34,27 @@ def create_app(config_class: type[Config] = Config):
     app.register_blueprint(incident_bp)
     app.register_blueprint(role_bp)
 
+    # Context processor to sync session with current database user data
+    @app.context_processor
+    def inject_current_user():
+        from flask import session
+        from app.models.user import User
+        
+        user_id = session.get('user_id')
+        if user_id:
+            user = User.query.get(user_id)
+            if user and user.is_active:
+                # Update session if role has changed
+                if session.get('user_role') != user.role:
+                    session['user_role'] = user.role
+                if session.get('username') != user.username:
+                    session['username'] = user.username
+                return {'current_user': user}
+            else:
+                # User is inactive or deleted, clear session
+                session.clear()
+        return {'current_user': None}
+    
     # Root route redirects to dashboard
     @app.route("/")
     def home():

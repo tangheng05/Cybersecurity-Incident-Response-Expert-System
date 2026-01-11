@@ -1,7 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from datetime import datetime
 from app.forms.auth_forms import LoginForm, RegisterForm
+from app.forms.user_forms import UserProfileForm
 from app.models import User
+from app.utils.decorators import login_required
 from extensions import db
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
@@ -64,6 +66,38 @@ def register():
         return redirect(url_for('auth.login'))
     
     return render_template('auth/register.html', form=form)
+
+
+@auth_bp.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    """Allow users to edit their own profile"""
+    user = User.query.get(session.get('user_id'))
+    if not user:
+        session.clear()
+        flash('User not found. Please log in again.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    form = UserProfileForm(original_user=user, obj=user)
+    
+    if form.validate_on_submit():
+        user.username = form.username.data
+        user.email = form.email.data
+        user.full_name = form.full_name.data
+        
+        # Update password if provided
+        if form.password.data:
+            user.set_password(form.password.data)
+        
+        db.session.commit()
+        
+        # Update session with new username
+        session['username'] = user.username
+        
+        flash('Your profile has been updated successfully!', 'success')
+        return redirect(url_for('auth.profile'))
+    
+    return render_template('auth/profile.html', form=form, user=user)
 
 
 @auth_bp.route('/logout')

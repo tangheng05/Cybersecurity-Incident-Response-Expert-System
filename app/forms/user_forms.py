@@ -149,6 +149,51 @@ class UserEditForm(FlaskForm):
             raise ValidationError("This email is already registered.")
 
 
+class UserProfileForm(FlaskForm):
+    """Form for users to edit their own profile (no role/active changes)"""
+    username = StringField(
+        "Username",
+        validators=[DataRequired(), Length(min=3, max=80)],
+    )
+    email = StringField(
+        "Email",
+        validators=[DataRequired(), Email(), Length(max=120)],
+    )
+    full_name = StringField(
+        "Full name",
+        validators=[DataRequired(), Length(min=1, max=120)],
+    )
+
+    # optional password - only change if filled
+    password = PasswordField(
+        "New password (leave blank to keep current)",
+        validators=[],
+        render_kw={"placeholder": "New strong password (optional)"},
+    )
+    confirm_password = PasswordField(
+        "Confirm new password",
+        validators=[EqualTo("password", message="Passwords must match.")],
+    )
+
+    submit = SubmitField("Update Profile")
+
+    def __init__(self, original_user: User, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.original_user = original_user
+
+    def validate_username(self, field):
+        q = db.select(User).filter(User.username == field.data, User.id != self.original_user.id)
+        exists = db.session.scalar(q)
+        if exists:
+            raise ValidationError("This username is already taken.")
+
+    def validate_email(self, field):
+        q = db.select(User).filter(User.email == field.data, User.id != self.original_user.id)
+        exists = db.session.scalar(q)
+        if exists:
+            raise ValidationError("This email is already registered.")
+
+
 class ConfirmDeleteForm(FlaskForm):
     submit = SubmitField("Confirm Delete")
 

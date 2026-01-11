@@ -83,34 +83,99 @@
                 <i class="fas fa-shield-alt me-1"></i>Security Rules
               </a>
             </li>
-            {% if session.user_role == 'admin' %}
+            {% if current_user and current_user.role == 'admin' %}
             <li class="nav-item">
               <a class="nav-link" href="{{ url_for('roles.index') }}">
                 <i class="fas fa-user-shield me-1"></i>Roles
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('users.index') }}">
+                <i class="fas fa-users me-1"></i>Users
+              </a>
+            </li>
             {% endif %}
           </ul>
-          <div class="navbar-nav align-items-center">
-            <button
-              class="btn nav-link me-3"
-              id="theme-toggle"
-              title="Toggle theme"
-            >
-              <i class="fas fa-moon"></i>
-            </button>
-            <span class="nav-link">
-              <i class="fas fa-user-circle me-2"></i>{{ session.username }}
-              <span
-                class="badge bg-{% if session.user_role == 'admin' %}danger{% elif session.user_role == 'analyst' %}warning{% else %}info{% endif %} ms-2"
+          <ul class="navbar-nav ms-auto align-items-center">
+            <li class="nav-item">
+              <button
+                class="btn nav-link"
+                id="theme-toggle"
+                title="Toggle theme"
               >
-                {{ session.user_role|upper }}
-              </span>
-            </span>
-            <a class="nav-link" href="{{ url_for('auth.logout') }}">
-              <i class="fas fa-sign-out-alt me-1"></i>Logout
-            </a>
-          </div>
+                <i class="fas fa-moon"></i>
+              </button>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle d-flex align-items-center"
+                href="#"
+                id="userDropdown"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                <i class="fas fa-user-circle me-2 fs-5"></i>
+                <span class="d-none d-lg-inline user-name-text"
+                  >{{ session.username }}</span
+                >
+                <span
+                  class="badge bg-{% if current_user and current_user.role == 'admin' %}danger{% elif current_user and current_user.role == 'analyst' %}warning{% else %}info{% endif %} ms-2"
+                >
+                  {{ current_user.role|upper if current_user else
+                  session.user_role|upper }}
+                </span>
+              </a>
+              <ul
+                class="dropdown-menu dropdown-menu-end user-dropdown"
+                aria-labelledby="userDropdown"
+              >
+                <li class="dropdown-header">
+                  <div class="d-flex align-items-center">
+                    <div class="user-avatar-circle">
+                      <i class="fas fa-user"></i>
+                    </div>
+                    <div class="ms-3">
+                      <div class="fw-bold">{{ session.username }}</div>
+                      {% if current_user %}
+                      <small class="text-muted">{{ current_user.email }}</small>
+                      {% endif %}
+                    </div>
+                  </div>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <div class="dropdown-item-text py-1">
+                    <div
+                      class="d-flex justify-content-between align-items-center"
+                    >
+                      <span class="text-muted small">Role</span>
+                      <span
+                        class="badge bg-{% if current_user and current_user.role == 'admin' %}danger{% elif current_user and current_user.role == 'analyst' %}warning{% else %}info{% endif %}"
+                      >
+                        {{ current_user.role|upper if current_user else
+                        session.user_role|upper }}
+                      </span>
+                    </div>
+                  </div>
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item" href="{{ url_for('auth.profile') }}">
+                    <i class="fas fa-user-edit me-2"></i>Edit Profile
+                  </a>
+                </li>
+                <li>
+                  <a
+                    class="dropdown-item text-danger"
+                    href="{{ url_for('auth.logout') }}"
+                  >
+                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
         </div>
       </div>
     </nav>
