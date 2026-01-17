@@ -4,9 +4,10 @@ block content %}
 
 <div class="card shadow-sm">
   <div class="card-body">
-    <form method="POST" novalidate>
+    <form method="POST" novalidate id="ruleForm">
       {{ form.hidden_tag() }}
 
+      <!-- Basic Information -->
       <div class="row">
         <div class="col-md-8">
           <div class="mb-3">
@@ -34,32 +35,159 @@ block content %}
         </div>
       </div>
 
-      <div class="mb-3">
-        {{ form.conditions.label(class="form-label") }} {{
-        form.conditions(class="form-control font-monospace" + (" is-invalid" if
-        form.conditions.errors else "")) }} {% if form.conditions.errors %}
-        <div class="invalid-feedback">
+      <!-- Conditions Builder -->
+      <div class="mb-4">
+        <label class="form-label fw-bold">Conditions</label>
+        <small class="text-muted d-block mb-2"
+          >Define what triggers this rule</small
+        >
+
+        <div id="conditionsContainer">
+          <!-- Dynamic conditions will be added here -->
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-sm btn-outline-primary"
+          id="addConditionBtn"
+        >
+          <i class="fas fa-plus"></i> Add Condition
+        </button>
+
+        <!-- Hidden field to store JSON -->
+        {{ form.conditions(class="d-none", id="conditionsJson") }} {% if
+        form.conditions.errors %}
+        <div class="text-danger small mt-1">
           {% for error in form.conditions.errors %}{{ error }}{% endfor %}
         </div>
         {% endif %}
-        <small class="form-text text-muted"
-          >Define conditions as JSON object</small
-        >
       </div>
 
-      <div class="mb-3">
-        {{ form.actions.label(class="form-label") }} {{
-        form.actions(class="form-control font-monospace" + (" is-invalid" if
-        form.actions.errors else "")) }} {% if form.actions.errors %}
-        <div class="invalid-feedback">
+      <!-- Actions Selector -->
+      <div class="mb-4">
+        <label class="form-label fw-bold">Recommended Actions</label>
+        <small class="text-muted d-block mb-2"
+          >Select actions to take when rule matches</small
+        >
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="block_ip"
+                id="action_block_ip"
+              />
+              <label class="form-check-label" for="action_block_ip">
+                <i class="fas fa-ban text-danger"></i> Block IP Address
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="block_country"
+                id="action_block_country"
+              />
+              <label class="form-check-label" for="action_block_country">
+                <i class="fas fa-globe text-danger"></i> Block Country
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="rate_limit"
+                id="action_rate_limit"
+              />
+              <label class="form-check-label" for="action_rate_limit">
+                <i class="fas fa-tachometer-alt text-warning"></i> Rate Limit
+              </label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="alert_admin"
+                id="action_alert_admin"
+              />
+              <label class="form-check-label" for="action_alert_admin">
+                <i class="fas fa-bell text-warning"></i> Alert Admin
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="quarantine_traffic"
+                id="action_quarantine"
+              />
+              <label class="form-check-label" for="action_quarantine">
+                <i class="fas fa-shield-alt text-info"></i> Quarantine Traffic
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="enable_captcha"
+                id="action_captcha"
+              />
+              <label class="form-check-label" for="action_captcha">
+                <i class="fas fa-check-square text-info"></i> Enable CAPTCHA
+              </label>
+            </div>
+          </div>
+          <div class="col-md-4">
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="log_incident"
+                id="action_log"
+              />
+              <label class="form-check-label" for="action_log">
+                <i class="fas fa-file-alt text-secondary"></i> Log Incident
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="monitor"
+                id="action_monitor"
+              />
+              <label class="form-check-label" for="action_monitor">
+                <i class="fas fa-eye text-secondary"></i> Monitor
+              </label>
+            </div>
+            <div class="form-check mb-2">
+              <input
+                class="form-check-input action-checkbox"
+                type="checkbox"
+                value="investigate"
+                id="action_investigate"
+              />
+              <label class="form-check-label" for="action_investigate">
+                <i class="fas fa-search text-primary"></i> Investigate
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden field to store JSON -->
+        {{ form.actions(class="d-none", id="actionsJson") }} {% if
+        form.actions.errors %}
+        <div class="text-danger small mt-1">
           {% for error in form.actions.errors %}{{ error }}{% endfor %}
         </div>
         {% endif %}
-        <small class="form-text text-muted"
-          >Define actions as JSON array of strings</small
-        >
       </div>
 
+      <!-- Priority and Severity -->
       <div class="row">
         <div class="col-md-4">
           <div class="mb-3">
@@ -104,4 +232,150 @@ block content %}
     </form>
   </div>
 </div>
+
+<script>
+  // Rule Form Builder Logic
+  let conditionCounter = 0;
+
+  function createConditionRow() {
+    conditionCounter++;
+    const div = document.createElement("div");
+    div.className = "condition-row mb-2";
+    div.dataset.id = conditionCounter;
+
+    div.innerHTML = `
+    <div class="row g-2 align-items-center">
+      <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm condition-key" placeholder="Field name (e.g., failed_attempts)" />
+      </div>
+      <div class="col-md-2">
+        <select class="form-select form-select-sm condition-operator">
+          <option value=">=">Greater or Equal (>=)</option>
+          <option value="<=">Less or Equal (<=)</option>
+          <option value=">">Greater Than (>)</option>
+          <option value="<">Less Than (<)</option>
+          <option value="==">Equals (==)</option>
+          <option value="equals">Text Equals</option>
+          <option value="boolean">Boolean</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <input type="text" class="form-control form-control-sm condition-value" placeholder="Value" />
+      </div>
+      <div class="col-md-3">
+        <small class="text-muted condition-hint">Enter numeric value</small>
+      </div>
+      <div class="col-md-1">
+        <button type="button" class="btn btn-sm btn-outline-danger remove-condition" onclick="removeCondition(${conditionCounter})">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    </div>
+  `;
+
+    document.getElementById("conditionsContainer").appendChild(div);
+
+    // Add event listener for operator change
+    const operatorSelect = div.querySelector(".condition-operator");
+    const valueInput = div.querySelector(".condition-value");
+    const hint = div.querySelector(".condition-hint");
+
+    operatorSelect.addEventListener("change", function () {
+      if (this.value === "boolean") {
+        valueInput.placeholder = "true or false";
+        hint.textContent = "Enter: true or false";
+      } else if (this.value === "equals") {
+        valueInput.placeholder = "Text value";
+        hint.textContent = "Enter text value";
+      } else {
+        valueInput.placeholder = "Numeric value";
+        hint.textContent = "Enter numeric value";
+      }
+    });
+
+    updateConditionsJson();
+  }
+
+  function removeCondition(id) {
+    const row = document.querySelector(`[data-id="${id}"]`);
+    if (row) {
+      row.remove();
+      updateConditionsJson();
+    }
+  }
+
+  function updateConditionsJson() {
+    const conditions = {};
+    document.querySelectorAll(".condition-row").forEach((row) => {
+      const key = row.querySelector(".condition-key").value.trim();
+      const operator = row.querySelector(".condition-operator").value;
+      const value = row.querySelector(".condition-value").value.trim();
+
+      if (key && value) {
+        if (operator === "boolean") {
+          conditions[key] = value.toLowerCase() === "true";
+        } else if (operator === "equals") {
+          conditions[key] = value;
+        } else {
+          conditions[key] = `${operator} ${value}`;
+        }
+      }
+    });
+
+    document.getElementById("conditionsJson").value =
+      JSON.stringify(conditions);
+  }
+
+  function updateActionsJson() {
+    const actions = [];
+    document
+      .querySelectorAll(".action-checkbox:checked")
+      .forEach((checkbox) => {
+        actions.push(checkbox.value);
+      });
+
+    document.getElementById("actionsJson").value = JSON.stringify(actions);
+  }
+
+  // Event Listeners
+  document
+    .getElementById("addConditionBtn")
+    .addEventListener("click", createConditionRow);
+
+  document.querySelectorAll(".action-checkbox").forEach((checkbox) => {
+    checkbox.addEventListener("change", updateActionsJson);
+  });
+
+  // Update JSON on any condition input change
+  document
+    .getElementById("conditionsContainer")
+    .addEventListener("input", updateConditionsJson);
+  document
+    .getElementById("conditionsContainer")
+    .addEventListener("change", updateConditionsJson);
+
+  // Form submission validation
+  document.getElementById("ruleForm").addEventListener("submit", function (e) {
+    updateConditionsJson();
+    updateActionsJson();
+
+    const conditionsValue = document.getElementById("conditionsJson").value;
+    const actionsValue = document.getElementById("actionsJson").value;
+
+    if (!conditionsValue || conditionsValue === "{}") {
+      e.preventDefault();
+      alert("Please add at least one condition!");
+      return false;
+    }
+
+    if (!actionsValue || actionsValue === "[]") {
+      e.preventDefault();
+      alert("Please select at least one action!");
+      return false;
+    }
+  });
+
+  // Add initial condition row
+  createConditionRow();
+</script>
 {% endblock %}
