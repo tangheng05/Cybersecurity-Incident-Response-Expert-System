@@ -27,8 +27,16 @@ class InferenceEngine:
                            explanation, attack_type_id
         """
         from app.services.rule_service import RuleService
+        from app.models.rule import Rule
+        from extensions import db
         
         if rules is None:
+            # Eagerly load attack_type relationship to avoid lazy loading issues
+            rules = db.session.query(Rule).filter_by(is_active=True)\
+                .options(db.joinedload(Rule.attack_type))\
+                .order_by(Rule.priority.desc(), Rule.severity_score.desc()).all()
+        
+        if not rules:
             rules = RuleService.get_all(active_only=True)
         
         # Match rules against alert

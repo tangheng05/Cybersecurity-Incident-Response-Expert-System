@@ -10,7 +10,7 @@ class Alert(db.Model):
     source_ip = db.Column(db.String(45), nullable=True)  # IPv4 or IPv6
     destination_ip = db.Column(db.String(45), nullable=True)
     alert_type = db.Column(db.String(50), nullable=False)  # Type of alert
-    severity = db.Column(db.Integer, default=5, nullable=False)  # 1-10
+    severity = db.Column(db.String(20), default='medium', nullable=False)  # low, medium, high, critical
     raw_data = db.Column(db.JSON, nullable=True)  # Flexible JSON storage for alert data
     status = db.Column(db.String(20), default='new', nullable=False)  # new, processed, ignored
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

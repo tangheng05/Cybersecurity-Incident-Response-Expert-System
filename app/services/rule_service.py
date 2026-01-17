@@ -24,6 +24,13 @@ class RuleService:
 
     @staticmethod
     def create(data: dict) -> Rule:
+        # Validate conditions and actions are not empty
+        if not data.get("conditions") or not isinstance(data["conditions"], dict) or len(data["conditions"]) == 0:
+            raise ValueError("Conditions cannot be empty. At least one condition is required.")
+        
+        if not data.get("actions") or not isinstance(data["actions"], list) or len(data["actions"]) == 0:
+            raise ValueError("Actions cannot be empty. At least one action is required.")
+        
         rule = Rule(
             name=data["name"],
             attack_type_id=data["attack_type_id"],
@@ -39,6 +46,13 @@ class RuleService:
 
     @staticmethod
     def update(rule: Rule, data: dict) -> Rule:
+        # Validate conditions and actions are not empty
+        if not data.get("conditions") or not isinstance(data["conditions"], dict) or len(data["conditions"]) == 0:
+            raise ValueError("Conditions cannot be empty. At least one condition is required.")
+        
+        if not data.get("actions") or not isinstance(data["actions"], list) or len(data["actions"]) == 0:
+            raise ValueError("Actions cannot be empty. At least one action is required.")
+        
         rule.name = data["name"]
         rule.attack_type_id = data["attack_type_id"]
         rule.conditions = data["conditions"]

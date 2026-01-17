@@ -33,18 +33,23 @@ def create():
     form.attack_type_id.choices = [(at.id, at.name.replace('_', ' ').title()) for at in attack_types]
     
     if form.validate_on_submit():
-        data = {
-            'name': form.name.data,
-            'attack_type_id': form.attack_type_id.data,
-            'conditions': json.loads(form.conditions.data),
-            'actions': json.loads(form.actions.data),
-            'priority': form.priority.data,
-            'severity_score': form.severity_score.data,
-            'is_active': form.is_active.data,
-        }
-        rule = RuleService.create(data)
-        flash(f'Rule "{rule.name}" created successfully!', 'success')
-        return redirect(url_for('rules.index'))
+        try:
+            data = {
+                'name': form.name.data,
+                'attack_type_id': form.attack_type_id.data,
+                'conditions': json.loads(form.conditions.data),
+                'actions': json.loads(form.actions.data),
+                'priority': form.priority.data,
+                'severity_score': form.severity_score.data,
+                'is_active': form.is_active.data,
+            }
+            rule = RuleService.create(data)
+            flash(f'Rule "{rule.name}" created successfully!', 'success')
+            return redirect(url_for('rules.index'))
+        except ValueError as e:
+            flash(f'Validation error: {str(e)}', 'danger')
+        except Exception as e:
+            flash(f'Error creating rule: {str(e)}', 'danger')
     
     return render_template('rules/create.html', form=form)
 
@@ -61,18 +66,23 @@ def edit(rule_id: int):
     form.attack_type_id.choices = [(at.id, at.name.replace('_', ' ').title()) for at in attack_types]
     
     if form.validate_on_submit():
-        data = {
-            'name': form.name.data,
-            'attack_type_id': form.attack_type_id.data,
-            'conditions': json.loads(form.conditions.data),
-            'actions': json.loads(form.actions.data),
-            'priority': form.priority.data,
-            'severity_score': form.severity_score.data,
-            'is_active': form.is_active.data,
-        }
-        RuleService.update(rule, data)
-        flash(f'Rule "{rule.name}" updated successfully!', 'success')
-        return redirect(url_for('rules.detail', rule_id=rule.id))
+        try:
+            data = {
+                'name': form.name.data,
+                'attack_type_id': form.attack_type_id.data,
+                'conditions': json.loads(form.conditions.data),
+                'actions': json.loads(form.actions.data),
+                'priority': form.priority.data,
+                'severity_score': form.severity_score.data,
+                'is_active': form.is_active.data,
+            }
+            RuleService.update(rule, data)
+            flash(f'Rule "{rule.name}" updated successfully!', 'success')
+            return redirect(url_for('rules.detail', rule_id=rule.id))
+        except ValueError as e:
+            flash(f'Validation error: {str(e)}', 'danger')
+        except Exception as e:
+            flash(f'Error updating rule: {str(e)}', 'danger')
     
     # Pre-fill JSON fields
     if not form.is_submitted():
