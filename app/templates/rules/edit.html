@@ -252,8 +252,8 @@ block content %}
 <script>
   // Rule Form Builder Logic for Edit
   let conditionCounter = 0;
-  const existingConditions = {{ (rule.conditions | tojson) if rule else '{}' }};
-  const existingActions = {{ (rule.actions | tojson) if rule else '[]' }};
+  const existingConditions = {{ (rule.conditions | tojson | safe) if rule else '{}' }};
+  const existingActions = {{ (rule.actions | tojson | safe) if rule else '[]' }};
 
   function createConditionRow(key = '', operator = '>=', value = '') {
     conditionCounter++;
