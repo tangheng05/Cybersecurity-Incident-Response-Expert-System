@@ -41,6 +41,7 @@ def create():
                 'actions': json.loads(form.actions.data),
                 'priority': form.priority.data,
                 'severity_score': form.severity_score.data,
+                'match_threshold': form.match_threshold.data,
                 'is_active': form.is_active.data,
             }
             rule = RuleService.create(data)
@@ -74,6 +75,7 @@ def edit(rule_id: int):
                 'actions': json.loads(form.actions.data),
                 'priority': form.priority.data,
                 'severity_score': form.severity_score.data,
+                'match_threshold': form.match_threshold.data,
                 'is_active': form.is_active.data,
             }
             RuleService.update(rule, data)
@@ -88,6 +90,7 @@ def edit(rule_id: int):
     if not form.is_submitted():
         form.conditions.data = json.dumps(rule.conditions, indent=2)
         form.actions.data = json.dumps(rule.actions, indent=2)
+        form.match_threshold.data = int(rule.match_threshold * 100)  # Convert 0.7 -> 70
     
     return render_template('rules/edit.html', form=form, rule=rule)
 

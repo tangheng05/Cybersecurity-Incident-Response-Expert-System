@@ -47,6 +47,13 @@ class RuleForm(FlaskForm):
         default=5
     )
     
+    match_threshold = IntegerField(
+        'Match Threshold (%)',
+        validators=[DataRequired(), NumberRange(min=1, max=100)],
+        default=70,
+        render_kw={'placeholder': '70'}
+    )
+    
     is_active = BooleanField('Active', default=True)
     
     submit = SubmitField('Save Rule')

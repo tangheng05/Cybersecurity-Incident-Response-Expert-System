@@ -187,7 +187,7 @@ block content %}
 
       <!-- Priority and Severity -->
       <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="mb-3">
             {{ form.priority.label(class="form-label") }} {{
             form.priority(class="form-select" + (" is-invalid" if
@@ -198,7 +198,7 @@ block content %}
             {% endif %}
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
           <div class="mb-3">
             {{ form.severity_score.label(class="form-label") }} {{
             form.severity_score(class="form-control" + (" is-invalid" if
@@ -211,7 +211,23 @@ block content %}
             {% endif %}
           </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
+          <div class="mb-3">
+            {{ form.match_threshold.label(class="form-label") }} {{
+            form.match_threshold(class="form-control" + (" is-invalid" if
+            form.match_threshold.errors else "")) }} {% if
+            form.match_threshold.errors %}
+            <div class="invalid-feedback">
+              {% for error in form.match_threshold.errors %}{{ error }}{% endfor
+              %}
+            </div>
+            {% endif %}
+            <small class="form-text text-muted"
+              >% of conditions that must match</small
+            >
+          </div>
+        </div>
+        <div class="col-md-3">
           <div class="mb-3 mt-4">
             <div class="form-check">
               {{ form.is_active(class="form-check-input") }} {{

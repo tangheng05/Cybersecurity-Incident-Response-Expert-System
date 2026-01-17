@@ -31,6 +31,9 @@ class RuleService:
         if not data.get("actions") or not isinstance(data["actions"], list) or len(data["actions"]) == 0:
             raise ValueError("Actions cannot be empty. At least one action is required.")
         
+        # Convert match_threshold from percentage (1-100) to decimal (0.01-1.0)
+        match_threshold = data.get("match_threshold", 70) / 100.0
+        
         rule = Rule(
             name=data["name"],
             attack_type_id=data["attack_type_id"],
@@ -38,6 +41,7 @@ class RuleService:
             actions=data["actions"],
             priority=data.get("priority", "medium"),
             severity_score=data.get("severity_score", 5),
+            match_threshold=match_threshold,
             is_active=data.get("is_active", True),
         )
         db.session.add(rule)
@@ -53,12 +57,16 @@ class RuleService:
         if not data.get("actions") or not isinstance(data["actions"], list) or len(data["actions"]) == 0:
             raise ValueError("Actions cannot be empty. At least one action is required.")
         
+        # Convert match_threshold from percentage (1-100) to decimal (0.01-1.0)
+        match_threshold = data.get("match_threshold", 70) / 100.0
+        
         rule.name = data["name"]
         rule.attack_type_id = data["attack_type_id"]
         rule.conditions = data["conditions"]
         rule.actions = data["actions"]
         rule.priority = data.get("priority", "medium")
         rule.severity_score = data.get("severity_score", 5)
+        rule.match_threshold = match_threshold
         rule.is_active = data.get("is_active", True)
         db.session.commit()
         return rule

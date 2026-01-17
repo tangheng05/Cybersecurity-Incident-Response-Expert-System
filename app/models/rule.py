@@ -12,6 +12,7 @@ class Rule(db.Model):
     actions = db.Column(db.JSON, nullable=False)  # JSON array of action strings
     priority = db.Column(db.String(20), default='medium', nullable=False)  # high, medium, low
     severity_score = db.Column(db.Integer, default=5, nullable=False)  # 1-10
+    match_threshold = db.Column(db.Float, default=0.7, nullable=False)  # 0.0-1.0, percentage of conditions that must match
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

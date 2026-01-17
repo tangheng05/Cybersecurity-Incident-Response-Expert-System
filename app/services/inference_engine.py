@@ -40,6 +40,8 @@ class InferenceEngine:
             rules = RuleService.get_all(active_only=True)
         
         # Match rules against alert
+        # Strategy: Use ALL matching rules (not just first match)
+        # This allows combining actions from multiple rules for comprehensive response
         matched_rules = InferenceEngine.match_rules(alert, rules)
         
         if not matched_rules:
@@ -150,7 +152,9 @@ class InferenceEngine:
                     matched_conditions += 1
         
         match_score = matched_conditions / total_conditions
-        is_match = match_score >= 0.7  # 70% threshold for rule match
+        # Use rule's configurable threshold instead of hardcoded value
+        threshold = getattr(rule, 'match_threshold', 0.7)  # Default to 0.7 if not set
+        is_match = match_score >= threshold
         
         return is_match, match_score
     
@@ -187,18 +191,8 @@ class InferenceEngine:
         Returns:
             List of unique action strings, ordered by priority
         """
-        action_priority = {
-            'block_ip': 10,
-            'block_country': 9,
-            'rate_limit': 8,
-            'alert_admin': 7,
-            'quarantine_traffic': 6,
-            'enable_captcha': 5,
-            'log_incident': 4,
-            'monitor': 3,
-            'investigate': 2,
-            'notify_team': 1
-        }
+        from config import Config
+        action_priority = Config.ACTION_PRIORITIES
         
         actions_set = set()
         
@@ -266,8 +260,14 @@ class InferenceEngine:
         explanation_parts.append(
             f"Alert analyzed and matched {num_rules} security rule(s). "
             f"Primary match: '{top_rule.name}' (Priority: {top_rule.priority.upper()}, "
-            f"Severity: {top_rule.severity_score}/10)."
+            f"Severity: {top_rule.severity_score}/10, Threshold: {int(top_rule.match_threshold * 100)}%)."
         )
+        
+        if num_rules > 1:
+            explanation_parts.append(
+                f"\n\nConflict Resolution: Actions combined from all {num_rules} matching rules, "
+                "prioritized by action severity (block > alert > monitor)."
+            )
         
         # Attack type
         if top_rule.attack_type:
