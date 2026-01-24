@@ -58,8 +58,8 @@ def index():
                 'alert_id': alert.id,
                 'alert_type': alert.alert_type,
                 'confidence': analysis['final_cf'],
-                'matched_rules_count': len([t for t in analysis['trace'] if t.fired]),
-                'recommended_actions': [],
+                'matched_rules_count': len(analysis.get('fired_rules', [])),
+                'recommended_actions': analysis.get('recommended_actions', []),
                 'severity': alert.severity,
                 'source_ip': alert.source_ip
             }

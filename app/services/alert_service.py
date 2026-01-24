@@ -12,6 +12,52 @@ class AlertService:
     """Service class for Alert CRUD operations"""
     
     @staticmethod
+    def _generate_recommended_actions(conclusion: str, cf: float) -> list:
+        """Generate recommended actions based on attack conclusion and CF"""
+        if not conclusion:
+            return ['Monitor alert for further activity', 'Review system logs']
+        
+        actions_map = {
+            'brute_force_attack': [
+                'Block source IP address immediately',
+                'Enable account lockout after failed attempts',
+                'Review authentication logs',
+                'Implement rate limiting on login endpoints',
+                'Enable multi-factor authentication'
+            ],
+            'credential_stuffing': [
+                'Block source IP address',
+                'Force password reset for affected accounts',
+                'Implement CAPTCHA on login forms',
+                'Monitor for lateral movement',
+                'Check for compromised credentials in breach databases'
+            ],
+            'ddos_attack': [
+                'Activate DDoS mitigation service',
+                'Rate limit incoming connections',
+                'Block malicious IP ranges',
+                'Scale infrastructure resources',
+                'Contact ISP for upstream filtering'
+            ],
+            'apt_attack': [
+                'Isolate affected systems immediately',
+                'Conduct full forensic analysis',
+                'Review network traffic for data exfiltration',
+                'Reset credentials for all privileged accounts',
+                'Engage incident response team'
+            ]
+        }
+        
+        base_actions = actions_map.get(conclusion, ['Investigate alert', 'Review logs'])
+        
+        if cf >= 0.9:
+            return ['🚨 HIGH PRIORITY: ' + base_actions[0]] + base_actions[1:3]
+        elif cf >= 0.7:
+            return base_actions[:3]
+        else:
+            return base_actions[:2] + ['Continue monitoring']
+    
+    @staticmethod
     def get_all(status: Optional[str] = None) -> List[Alert]:
         """
         Get all alerts, optionally filtered by status
@@ -82,7 +128,7 @@ class AlertService:
         
         conclusions_dict, trace = InferenceEngine.infer(facts, rule_models)
         
-        top_conclusion = None
+        top_conclusion_name = None
         top_cf = 0.0
         attack_type_id = None
         
@@ -107,6 +153,8 @@ class AlertService:
         explanation_result = InferenceEngine.explain(top_conclusion_name, trace) if top_conclusion_name else {}
         explanation = explanation_result.get('summary', 'No conclusion reached')
         
+        recommended_actions = AlertService._generate_recommended_actions(top_conclusion_name, top_cf)
+        
         incident = Incident(
             alert_id=alert.id,
             attack_type_id=attack_type_id,
@@ -114,6 +162,7 @@ class AlertService:
             trace=trace.to_dict(),
             final_cf=top_cf,
             explanation=explanation,
+            recommended_actions=recommended_actions,
             status='new'
         )
         
@@ -126,8 +175,11 @@ class AlertService:
             'top_conclusion': top_conclusion_name,
             'final_cf': top_cf,
             'explanation': explanation,
+            'recommended_actions': recommended_actions,
             'facts': list(facts),
-            'trace': trace.to_dict()
+            'trace': trace.to_dict(),
+            'fired_rules': trace.fired_rules,
+            'trace_object': trace
         }
     
     @staticmethod

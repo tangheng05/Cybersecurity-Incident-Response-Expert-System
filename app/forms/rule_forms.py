@@ -39,18 +39,6 @@ class RuleForm(FlaskForm):
         render_kw={'step': '0.01', 'placeholder': '0.85'}
     )
     
-    priority = SelectField(
-        'Priority',
-        choices=[('high', 'High'), ('medium', 'Medium'), ('low', 'Low')],
-        validators=[DataRequired()]
-    )
-    
-    severity_score = IntegerField(
-        'Severity Score (1-10)',
-        validators=[DataRequired(), NumberRange(min=1, max=10)],
-        default=5
-    )
-    
     is_active = BooleanField('Active', default=True)
     
     submit = SubmitField('Save Rule')

@@ -58,11 +58,13 @@ def detail(incident_id: int):
     alert = Alert.query.get(incident.alert_id)
     attack_type = AttackType.query.get(incident.attack_type_id) if incident.attack_type_id else None
     
-    # Get matched rules
+    # Get matched rules from trace
     matched_rules = []
-    if incident.matched_rules:
-        matched_rule_ids = incident.matched_rules
-        matched_rules = Rule.query.filter(Rule.id.in_(matched_rule_ids)).all()
+    if incident.trace and isinstance(incident.trace, dict):
+        fired_rules = incident.trace.get('fired_rules', [])
+        if fired_rules:
+            rule_ids = [int(r['rule_id']) for r in fired_rules if 'rule_id' in r]
+            matched_rules = Rule.query.filter(Rule.id.in_(rule_ids)).all() if rule_ids else []
     
     # Get incident history
     history = IncidentHistory.query.filter_by(incident_id=incident_id)\
