@@ -73,17 +73,23 @@ class AlertService:
         from app.services.inference_engine import InferenceEngine
         from app.services.fact_extractor import FactExtractor
         from app.models.attack_type import AttackType
+        from app.models.rule import Rule
         
         facts = FactExtractor.extract_facts(alert)
-        result = InferenceEngine.infer(facts)
+        
+        active_rules = Rule.query.filter_by(is_active=True).all()
+        rule_models = InferenceEngine.load_rules_from_db(active_rules)
+        
+        conclusions_dict, trace = InferenceEngine.infer(facts, rule_models)
         
         top_conclusion = None
         top_cf = 0.0
         attack_type_id = None
         
-        if result.conclusions:
-            top_conclusion = result.conclusions[0]
-            top_cf = top_conclusion.cf
+        if conclusions_dict:
+            sorted_conclusions = sorted(conclusions_dict.items(), key=lambda x: x[1], reverse=True)
+            top_conclusion_name = sorted_conclusions[0][0]
+            top_cf = sorted_conclusions[0][1]
             
             conclusion_to_attack = {
                 'brute_force_attack': 'brute_force',
@@ -92,19 +98,20 @@ class AlertService:
                 'apt_attack': 'unauthorized_access'
             }
             
-            attack_name = conclusion_to_attack.get(top_conclusion.conclusion)
+            attack_name = conclusion_to_attack.get(top_conclusion_name)
             if attack_name:
                 attack_type = AttackType.query.filter_by(name=attack_name).first()
                 if attack_type:
                     attack_type_id = attack_type.id
         
-        explanation = InferenceEngine.explain(result, facts)
+        explanation_result = InferenceEngine.explain(top_conclusion_name, trace) if top_conclusion_name else {}
+        explanation = explanation_result.get('summary', 'No conclusion reached')
         
         incident = Incident(
             alert_id=alert.id,
             attack_type_id=attack_type_id,
-            conclusions=[c.__dict__ for c in result.conclusions],
-            trace=[t.__dict__ for t in result.trace],
+            conclusions=[{'conclusion': k, 'cf': v} for k, v in conclusions_dict.items()],
+            trace=trace.to_dict(),
             final_cf=top_cf,
             explanation=explanation,
             status='new'
@@ -116,11 +123,11 @@ class AlertService:
         
         return {
             'incident': incident,
-            'top_conclusion': top_conclusion.conclusion if top_conclusion else None,
+            'top_conclusion': top_conclusion_name,
             'final_cf': top_cf,
             'explanation': explanation,
-            'facts': facts,
-            'trace': result.trace
+            'facts': list(facts),
+            'trace': trace.to_dict()
         }
     
     @staticmethod
