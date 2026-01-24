@@ -5,6 +5,7 @@ import json
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from app.models.alert import Alert
 from app.models.incident import Incident
+from app.models.attack_type import AttackType
 from app.forms.alert_forms import AlertForm
 from app.services.alert_service import AlertService
 from app.utils.decorators import login_required, role_required
@@ -45,6 +46,10 @@ def detail(alert_id: int):
 def create():
     """Create and analyze new alert - All users can submit"""
     form = AlertForm()
+    
+    # Populate alert_type choices from database
+    attack_types = AttackType.query.filter_by(is_active=True).order_by(AttackType.name).all()
+    form.alert_type.choices = [(at.name, at.name.replace('_', ' ').title()) for at in attack_types]
     
     if form.validate_on_submit():
         try:

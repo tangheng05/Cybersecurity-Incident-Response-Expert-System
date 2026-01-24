@@ -18,15 +18,8 @@ class AlertForm(FlaskForm):
     
     alert_type = SelectField(
         'Alert Type',
-        choices=[
-            ('suspicious_activity', 'Suspicious Activity'),
-            ('login_attempt', 'Login Attempt'),
-            ('network_traffic', 'Network Traffic'),
-            ('malware_detected', 'Malware Detected'),
-            ('other', 'Other')
-        ],
-        validators=[DataRequired()],
-        default='suspicious_activity'
+        choices=[],  # Will be populated dynamically
+        validators=[DataRequired()]
     )
     
     severity = SelectField(
