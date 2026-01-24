@@ -51,3 +51,4 @@ htmlcov/
 # Exports
 database_exports/*.json
 database_exports/*.sql
+app/__pycache__/__init__.cpython-312.pyc

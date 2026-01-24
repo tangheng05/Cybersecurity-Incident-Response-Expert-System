@@ -1,298 +1,274 @@
 """
-Inference Engine for Cybersecurity Incident Response Expert System
-Analyzes alerts against security rules and generates recommendations
+Forward-Chaining Inference Engine with Certainty Factors
 """
+
+from typing import Set, Dict, List, Tuple, Any, Optional
+from dataclasses import dataclass, field
 import json
-from datetime import datetime, timedelta
-from typing import List, Dict, Tuple, Any
-from app.models.rule import Rule
-from app.models.alert import Alert
-from app.models.attack_type import AttackType
+
+
+@dataclass
+class RuleModel:
+    id: str
+    conditions: Set[str]
+    conclusion: str
+    cf: float
+    explanation_text: str = ""
+    
+    def __post_init__(self):
+        if not 0.0 <= self.cf <= 1.0:
+            raise ValueError(f"CF must be in [0.0, 1.0], got {self.cf}")
+    
+    def to_dict(self) -> Dict:
+        return {
+            'id': self.id,
+            'conditions': list(self.conditions),
+            'conclusion': self.conclusion,
+            'cf': self.cf,
+            'explanation_text': self.explanation_text
+        }
+
+
+@dataclass
+class ConclusionRecord:
+    conclusion: str
+    final_cf: float
+    supporting_rules: List[Dict[str, Any]] = field(default_factory=list)
+    used_facts: Set[str] = field(default_factory=set)
+    
+    def to_dict(self) -> Dict:
+        return {
+            'conclusion': self.conclusion,
+            'final_cf': self.final_cf,
+            'supporting_rules': self.supporting_rules,
+            'used_facts': list(self.used_facts)
+        }
+
+
+@dataclass
+class Trace:
+    fired_rules: List[Dict[str, Any]] = field(default_factory=list)
+    skipped_rules: List[Dict[str, Any]] = field(default_factory=list)
+    conclusions: Dict[str, ConclusionRecord] = field(default_factory=dict)
+    
+    def to_dict(self) -> Dict:
+        return {
+            'fired_rules': self.fired_rules,
+            'skipped_rules': self.skipped_rules,
+            'conclusions': {k: v.to_dict() for k, v in self.conclusions.items()}
+        }
+    
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict(), indent=2)
 
 
 class InferenceEngine:
-    """Core reasoning engine for analyzing security alerts"""
     
     @staticmethod
-    def analyze_alert(alert: Alert, rules: List[Rule] = None) -> Dict[str, Any]:
-        """
-        Main analysis function - analyzes an alert against all active rules
-        
-        Args:
-            alert: Alert object to analyze
-            rules: Optional list of rules (if None, fetches all active rules)
-            
-        Returns:
-            dict with keys: matched_rules, recommended_actions, confidence_score, 
-                           explanation, attack_type_id
-        """
-        from app.services.rule_service import RuleService
-        from app.models.rule import Rule
-        from extensions import db
-        
-        if rules is None:
-            # Eagerly load attack_type relationship to avoid lazy loading issues
-            rules = db.session.query(Rule).filter_by(is_active=True)\
-                .options(db.joinedload(Rule.attack_type))\
-                .order_by(Rule.priority.desc(), Rule.severity_score.desc()).all()
-        
-        if not rules:
-            rules = RuleService.get_all(active_only=True)
-        
-        # Match rules against alert
-        # Strategy: Use ALL matching rules (not just first match)
-        # This allows combining actions from multiple rules for comprehensive response
-        matched_rules = InferenceEngine.match_rules(alert, rules)
-        
-        if not matched_rules:
-            return {
-                'matched_rules': [],
-                'recommended_actions': ['monitor', 'log_for_analysis'],
-                'confidence_score': 0,
-                'explanation': 'No matching rules found. Alert logged for manual review.',
-                'attack_type_id': None
-            }
-        
-        # Prioritize and select actions
-        actions = InferenceEngine.prioritize_actions(matched_rules)
-        
-        # Calculate confidence score
-        confidence = InferenceEngine.calculate_confidence(matched_rules, alert)
-        
-        # Generate explanation
-        explanation = InferenceEngine.generate_explanation(matched_rules, alert)
-        
-        # Determine primary attack type
-        attack_type_id = matched_rules[0]['rule'].attack_type_id if matched_rules else None
-        
-        return {
-            'matched_rules': [r['rule'].id for r in matched_rules],
-            'recommended_actions': actions,
-            'confidence_score': confidence,
-            'explanation': explanation,
-            'attack_type_id': attack_type_id
-        }
+    def combine_cfs(cf_old: float, cf_new: float) -> float:
+        result = cf_old + cf_new * (1.0 - cf_old)
+        return max(0.0, min(1.0, result))
     
     @staticmethod
-    def match_rules(alert: Alert, rules: List[Rule]) -> List[Dict[str, Any]]:
-        """
-        Pattern matching - finds all rules that match the alert
-        
-        Returns:
-            List of dicts with 'rule' and 'match_score' keys, sorted by priority
-        """
-        matched = []
+    def infer(facts: Set[str], rules: List[RuleModel]) -> Tuple[Dict[str, float], Trace]:
+        trace = Trace()
+        conclusions: Dict[str, float] = {}
+        support_map: Dict[str, List[Dict]] = {}
         
         for rule in rules:
-            if not rule.is_active:
-                continue
+            missing_conditions = rule.conditions - facts
             
-            # Evaluate rule conditions against alert
-            is_match, match_score = InferenceEngine.evaluate_conditions(alert, rule)
-            
-            if is_match:
-                matched.append({
-                    'rule': rule,
-                    'match_score': match_score
+            if not missing_conditions:
+                trace.fired_rules.append({
+                    'rule_id': rule.id,
+                    'matched_conditions': list(rule.conditions),
+                    'cf': rule.cf,
+                    'conclusion': rule.conclusion,
+                    'explanation': rule.explanation_text
+                })
+                
+                if rule.conclusion in conclusions:
+                    old_cf = conclusions[rule.conclusion]
+                    new_cf = InferenceEngine.combine_cfs(old_cf, rule.cf)
+                    conclusions[rule.conclusion] = new_cf
+                    
+                    support_map[rule.conclusion].append({
+                        'rule_id': rule.id,
+                        'cf': rule.cf,
+                        'matched_conditions': list(rule.conditions),
+                        'explanation': rule.explanation_text
+                    })
+                else:
+                    conclusions[rule.conclusion] = rule.cf
+                    support_map[rule.conclusion] = [{
+                        'rule_id': rule.id,
+                        'cf': rule.cf,
+                        'matched_conditions': list(rule.conditions),
+                        'explanation': rule.explanation_text
+                    }]
+            else:
+                trace.skipped_rules.append({
+                    'rule_id': rule.id,
+                    'missing_conditions': list(missing_conditions),
+                    'conclusion': rule.conclusion,
+                    'explanation': rule.explanation_text
                 })
         
-        # Sort by priority (high=3, medium=2, low=1) then severity_score
-        priority_map = {'high': 3, 'medium': 2, 'low': 1}
-        matched.sort(
-            key=lambda x: (
-                priority_map.get(x['rule'].priority, 0),
-                x['rule'].severity_score,
-                x['match_score']
-            ),
-            reverse=True
-        )
-        
-        return matched
-    
-    @staticmethod
-    def evaluate_conditions(alert: Alert, rule: Rule) -> Tuple[bool, float]:
-        """
-        Evaluates if alert data matches rule conditions
-        
-        Returns:
-            (is_match: bool, match_score: float 0-1)
-        """
-        conditions = rule.conditions
-        raw_data = alert.raw_data or {}
-        
-        matched_conditions = 0
-        total_conditions = len(conditions)
-        
-        if total_conditions == 0:
-            return False, 0.0
-        
-        for key, condition_value in conditions.items():
-            alert_value = raw_data.get(key)
+        for conclusion, final_cf in conclusions.items():
+            used_facts: Set[str] = set()
+            for support in support_map[conclusion]:
+                used_facts.update(support['matched_conditions'])
             
-            # Handle different condition types
-            if isinstance(condition_value, str) and any(op in condition_value for op in ['>=', '<=', '>', '<', '==']):
-                # Numeric comparison
-                if InferenceEngine._evaluate_numeric_condition(alert_value, condition_value):
-                    matched_conditions += 1
-            elif isinstance(condition_value, bool):
-                # Boolean check
-                if alert_value == condition_value:
-                    matched_conditions += 1
-            elif isinstance(condition_value, str):
-                # String match or IP address
-                if str(alert_value) == condition_value or alert_value == condition_value:
-                    matched_conditions += 1
-            elif isinstance(condition_value, list):
-                # Value in list
-                if alert_value in condition_value:
-                    matched_conditions += 1
-            else:
-                # Direct equality
-                if alert_value == condition_value:
-                    matched_conditions += 1
-        
-        match_score = matched_conditions / total_conditions
-        # Use rule's configurable threshold instead of hardcoded value
-        threshold = getattr(rule, 'match_threshold', 0.7)  # Default to 0.7 if not set
-        is_match = match_score >= threshold
-        
-        return is_match, match_score
-    
-    @staticmethod
-    def _evaluate_numeric_condition(value: Any, condition: str) -> bool:
-        """Evaluates numeric conditions like '>= 5', '< 100'"""
-        try:
-            # Parse condition string
-            if '>=' in condition:
-                threshold = float(condition.split('>=')[1].strip())
-                return float(value) >= threshold
-            elif '<=' in condition:
-                threshold = float(condition.split('<=')[1].strip())
-                return float(value) <= threshold
-            elif '>' in condition:
-                threshold = float(condition.split('>')[1].strip())
-                return float(value) > threshold
-            elif '<' in condition:
-                threshold = float(condition.split('<')[1].strip())
-                return float(value) < threshold
-            elif '==' in condition:
-                threshold = float(condition.split('==')[1].strip())
-                return float(value) == threshold
-        except (ValueError, TypeError, AttributeError):
-            return False
-        
-        return False
-    
-    @staticmethod
-    def prioritize_actions(matched_rules: List[Dict[str, Any]]) -> List[str]:
-        """
-        Combines and prioritizes actions from multiple matched rules
-        
-        Returns:
-            List of unique action strings, ordered by priority
-        """
-        from config import Config
-        action_priority = Config.ACTION_PRIORITIES
-        
-        actions_set = set()
-        
-        for match in matched_rules:
-            rule_actions = match['rule'].actions
-            if isinstance(rule_actions, list):
-                actions_set.update(rule_actions)
-        
-        # Sort actions by priority
-        sorted_actions = sorted(
-            actions_set,
-            key=lambda a: action_priority.get(a, 0),
-            reverse=True
-        )
-        
-        return sorted_actions
-    
-    @staticmethod
-    def calculate_confidence(matched_rules: List[Dict[str, Any]], alert: Alert) -> int:
-        """
-        Calculates confidence score (0-100) based on:
-        - Number of matching rules
-        - Match scores
-        - Rule priority levels
-        - Alert severity
-        """
-        if not matched_rules:
-            return 0
-        
-        # Base score from number of matches
-        num_matches = len(matched_rules)
-        base_score = min(40, num_matches * 10)
-        
-        # Average match score contribution (0-30 points)
-        avg_match_score = sum(m['match_score'] for m in matched_rules) / num_matches
-        match_contribution = int(avg_match_score * 30)
-        
-        # Priority contribution (0-20 points)
-        priority_map = {'high': 20, 'medium': 15, 'low': 10}
-        top_priority = matched_rules[0]['rule'].priority if matched_rules else 'low'
-        priority_contribution = priority_map.get(top_priority, 10)
-        
-        # Severity contribution (0-10 points)
-        severity_map = {'critical': 10, 'high': 8, 'medium': 5, 'low': 2}
-        severity_contribution = severity_map.get(alert.severity, 5)
-        
-        total_score = base_score + match_contribution + priority_contribution + severity_contribution
-        
-        return min(100, total_score)
-    
-    @staticmethod
-    def generate_explanation(matched_rules: List[Dict[str, Any]], alert: Alert) -> str:
-        """
-        Generates human-readable explanation of the decision
-        """
-        if not matched_rules:
-            return "No matching security rules found for this alert."
-        
-        explanation_parts = []
-        
-        # Summary
-        num_rules = len(matched_rules)
-        top_rule = matched_rules[0]['rule']
-        
-        explanation_parts.append(
-            f"Alert analyzed and matched {num_rules} security rule(s). "
-            f"Primary match: '{top_rule.name}' (Priority: {top_rule.priority.upper()}, "
-            f"Severity: {top_rule.severity_score}/10, Threshold: {int(top_rule.match_threshold * 100)}%)."
-        )
-        
-        if num_rules > 1:
-            explanation_parts.append(
-                f"\n\nConflict Resolution: Actions combined from all {num_rules} matching rules, "
-                "prioritized by action severity (block > alert > monitor)."
+            trace.conclusions[conclusion] = ConclusionRecord(
+                conclusion=conclusion,
+                final_cf=final_cf,
+                supporting_rules=support_map[conclusion],
+                used_facts=used_facts
             )
         
-        # Attack type
-        if top_rule.attack_type:
-            explanation_parts.append(
-                f"\n\nDetected Attack Type: {top_rule.attack_type.name.replace('_', ' ').title()} - "
-                f"{top_rule.attack_type.description}"
-            )
-        
-        # Matched rules details
-        if num_rules > 1:
-            explanation_parts.append("\n\nMatched Rules:")
-            for idx, match in enumerate(matched_rules[:3], 1):  # Show top 3
-                rule = match['rule']
-                score = match['match_score']
-                explanation_parts.append(
-                    f"\n{idx}. {rule.name} (Match: {score*100:.0f}%, Severity: {rule.severity_score}/10)"
-                )
+        return conclusions, trace
+    
+    @staticmethod
+    def explain(conclusion_id: str, trace: Trace) -> Dict[str, Any]:
+        if conclusion_id in trace.conclusions:
+            record = trace.conclusions[conclusion_id]
             
-            if num_rules > 3:
-                explanation_parts.append(f"\n... and {num_rules - 3} more rule(s)")
+            return {
+                'type': 'why',
+                'conclusion': record.conclusion,
+                'final_cf': record.final_cf,
+                'supporting_rules': record.supporting_rules,
+                'used_facts': list(record.used_facts),
+                'stepwise_combination': InferenceEngine._compute_stepwise_cf(record.supporting_rules),
+                'summary': InferenceEngine._generate_why_summary(record)
+            }
+        else:
+            candidate_rules = [r for r in trace.skipped_rules if r['conclusion'] == conclusion_id]
+            
+            return {
+                'type': 'why_not',
+                'conclusion': conclusion_id,
+                'candidate_rules': candidate_rules,
+                'summary': InferenceEngine._generate_why_not_summary(conclusion_id, candidate_rules)
+            }
+    
+    @staticmethod
+    def _compute_stepwise_cf(supporting_rules: List[Dict]) -> List[Dict]:
+        steps = []
+        cf_running = 0.0
         
-        # Alert details
-        explanation_parts.append(f"\n\nAlert Details:")
-        explanation_parts.append(f"- Source IP: {alert.source_ip or 'Unknown'}")
-        explanation_parts.append(f"- Timestamp: {alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}")
-        explanation_parts.append(f"- Severity: {alert.severity.upper()}")
+        for idx, rule in enumerate(supporting_rules):
+            cf_before = cf_running
+            cf_after = InferenceEngine.combine_cfs(cf_running, rule['cf'])
+            
+            steps.append({
+                'step': idx + 1,
+                'rule_id': rule['rule_id'],
+                'rule_cf': rule['cf'],
+                'cf_before': round(cf_before, 4),
+                'cf_after': round(cf_after, 4),
+                'contribution': round(cf_after - cf_before, 4),
+                'explanation': rule.get('explanation', '')
+            })
+            
+            cf_running = cf_after
         
-        return ''.join(explanation_parts)
+        return steps
+    
+    @staticmethod
+    def _generate_why_summary(record: ConclusionRecord) -> str:
+        num_rules = len(record.supporting_rules)
+        cf_percent = int(record.final_cf * 100)
+        
+        summary = f"Conclusion '{record.conclusion}' reached with {cf_percent}% certainty. "
+        summary += f"Supported by {num_rules} rule(s) using {len(record.used_facts)} fact(s)."
+        
+        return summary
+    
+    @staticmethod
+    def _generate_why_not_summary(conclusion_id: str, candidate_rules: List[Dict]) -> str:
+        if not candidate_rules:
+            return f"Conclusion '{conclusion_id}' was not reached because no rules support it."
+        
+        num_candidates = len(candidate_rules)
+        all_missing = set()
+        for rule in candidate_rules:
+            all_missing.update(rule['missing_conditions'])
+        
+        summary = f"Conclusion '{conclusion_id}' was not reached. "
+        summary += f"{num_candidates} rule(s) could have supported it, "
+        summary += f"but {len(all_missing)} required fact(s) were missing: "
+        summary += f"{', '.join(sorted(all_missing))}"
+        
+        return summary
+    
+    @staticmethod
+    def load_rules_from_db(db_rules) -> List[RuleModel]:
+        rules = []
+        
+        for db_rule in db_rules:
+            conditions = set()
+            if hasattr(db_rule, 'symbolic_conditions') and db_rule.symbolic_conditions:
+                conditions = set(db_rule.symbolic_conditions)
+            
+            cf = db_rule.cf if hasattr(db_rule, 'cf') and db_rule.cf else 0.5
+            conclusion = db_rule.conclusion if hasattr(db_rule, 'conclusion') else "unknown"
+            
+            rule = RuleModel(
+                id=str(db_rule.id),
+                conditions=conditions,
+                conclusion=conclusion,
+                cf=cf,
+                explanation_text=db_rule.name if hasattr(db_rule, 'name') else ""
+            )
+            
+            rules.append(rule)
+        
+        return rules
+
+
+def print_trace(trace: Trace) -> None:
+    print("\n" + "="*60)
+    print("INFERENCE TRACE")
+    print("="*60)
+    
+    print(f"\nFired Rules: {len(trace.fired_rules)}")
+    for rule in trace.fired_rules:
+        print(f"  ✓ {rule['rule_id']}: {rule['conclusion']} (CF={rule['cf']})")
+        print(f"    Conditions: {', '.join(rule['matched_conditions'])}")
+    
+    print(f"\nSkipped Rules: {len(trace.skipped_rules)}")
+    for rule in trace.skipped_rules:
+        print(f"  ✗ {rule['rule_id']}: {rule['conclusion']}")
+        print(f"    Missing: {', '.join(rule['missing_conditions'])}")
+    
+    print(f"\nConclusions: {len(trace.conclusions)}")
+    for concl_id, record in trace.conclusions.items():
+        cf_percent = int(record.final_cf * 100)
+        print(f"  → {concl_id}: {cf_percent}% certainty")
+        print(f"    Rules: {len(record.supporting_rules)}")
+        print(f"    Facts: {', '.join(sorted(record.used_facts))}")
+    
+    print("="*60 + "\n")
+
+
+def validate_cf_combination() -> bool:
+    engine = InferenceEngine()
+    
+    cf1, cf2, cf3 = 0.7, 0.6, 0.5
+    
+    result1 = engine.combine_cfs(engine.combine_cfs(cf1, cf2), cf3)
+    result2 = engine.combine_cfs(cf1, engine.combine_cfs(cf2, cf3))
+    
+    tolerance = 1e-10
+    is_associative = abs(result1 - result2) < tolerance
+    
+    result_high = engine.combine_cfs(0.9, 0.9)
+    is_bounded = 0.0 <= result_high <= 1.0
+    
+    cf_base = 0.5
+    cf_add = 0.3
+    result = engine.combine_cfs(cf_base, cf_add)
+    is_monotonic = result >= cf_base
+    
+    return is_associative and is_bounded and is_monotonic
