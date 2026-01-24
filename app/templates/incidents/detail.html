@@ -238,11 +238,7 @@ endblock %} {% block content %}
             <select name="status" id="status" class="form-select" required>
               <option
                 value="new"
-                {%
-                if
-                incident.status=""
-                ="new"
-                %}selected{%
+                {% if incident.status == "new" %}selected{%
                 endif
                 %}
               >
@@ -250,11 +246,7 @@ endblock %} {% block content %}
               </option>
               <option
                 value="analyzing"
-                {%
-                if
-                incident.status=""
-                ="analyzing"
-                %}selected{%
+                {% if incident.status == "analyzing" %}selected{%
                 endif
                 %}
               >
@@ -262,11 +254,7 @@ endblock %} {% block content %}
               </option>
               <option
                 value="pending"
-                {%
-                if
-                incident.status=""
-                ="pending"
-                %}selected{%
+                {% if incident.status == "pending" %}selected{%
                 endif
                 %}
               >
@@ -274,11 +262,7 @@ endblock %} {% block content %}
               </option>
               <option
                 value="resolved"
-                {%
-                if
-                incident.status=""
-                ="resolved"
-                %}selected{%
+                {% if incident.status == "resolved" %}selected{%
                 endif
                 %}
               >
