@@ -96,6 +96,51 @@ class FactExtractor:
         if service:
             facts.add(f'{service}_service')
             
+            # Check for SQL injection patterns
+            sql_injection_patterns = [
+                "'", '"', '--', ';', 'union', 'select', 'drop', 'insert', 'update', 
+                'delete', 'exec', 'execute', 'script', '<', '>', 'or 1=1', 'or 1 = 1',
+                "' or '", '" or "', 'xp_', 'sp_', 'concat', 'char(', 'declare'
+            ]
+            if any(pattern in service for pattern in sql_injection_patterns):
+                facts.add('sql_injection_pattern')
+                facts.add('web_attack')
+            
+            # Check for XSS patterns
+            xss_patterns = ['<script', 'javascript:', 'onerror=', 'onload=', 'onclick=', 
+                           '<iframe', '<img', 'alert(', 'document.cookie', 'eval(']
+            if any(pattern in service for pattern in xss_patterns):
+                facts.add('xss_pattern')
+                facts.add('web_attack')
+            
+            # Check for port scan patterns
+            if 'port' in service or 'scan' in service or 'nmap' in service:
+                facts.add('port_scan_pattern')
+            
+            # Check for malware patterns
+            malware_patterns = ['.exe', '.dll', '.bat', '.ps1', '.vbs', 'payload', 
+                               'trojan', 'ransomware', 'virus', 'worm', 'backdoor']
+            if any(pattern in service for pattern in malware_patterns):
+                facts.add('malware_pattern')
+            
+            # Check for phishing patterns
+            phishing_patterns = ['login', 'verify', 'account', 'suspended', 'confirm',
+                                'password', 'urgent', 'click here', 'update payment']
+            if any(pattern in service for pattern in phishing_patterns):
+                facts.add('phishing_pattern')
+            
+            # Check for privilege escalation patterns
+            priv_esc_patterns = ['sudo', 'su -', 'runas', 'admin', 'root', 'privilege',
+                                'escalate', 'suid', 'chmod', 'chown']
+            if any(pattern in service for pattern in priv_esc_patterns):
+                facts.add('privilege_escalation_pattern')
+            
+            # Check for data exfiltration patterns
+            exfil_patterns = ['download', 'export', 'backup', 'copy', 'transfer',
+                            'ftp', 'scp', 'rsync', 'curl', 'wget']
+            if any(pattern in service for pattern in exfil_patterns):
+                facts.add('data_exfiltration_pattern')
+            
             if service in ['ssh', 'rdp', 'telnet']:
                 facts.add('remote_access_service')
             elif service in ['http', 'https']:
@@ -180,6 +225,13 @@ class FactExtractor:
         if raw_data.get('is_repeat_offender', False):
             facts.add('repeat_offender')
             facts.add('known_attacker')
+        
+        # Check for suspicious file access
+        if raw_data.get('file_access_count', 0) > 50:
+            facts.add('suspicious_file_access')
+        
+        if raw_data.get('sensitive_data_accessed', False):
+            facts.add('sensitive_data_access')
         
         return facts
     
@@ -281,7 +333,17 @@ class FactExtractor:
             'volumetric_attack_pattern': 'High traffic + high connections',
             'severe_ddos_pattern': 'Extreme DDoS indicators',
             'sustained_attack': 'Attack duration > 1 hour',
-            'repeat_offender': 'Known repeat attacker'
+            'repeat_offender': 'Known repeat attacker',
+            'sql_injection_pattern': 'SQL injection syntax detected',
+            'web_attack': 'Web application attack detected',
+            'xss_pattern': 'Cross-Site Scripting pattern detected',
+            'port_scan_pattern': 'Port scanning activity detected',
+            'malware_pattern': 'Malware indicators detected',
+            'phishing_pattern': 'Phishing attempt detected',
+            'privilege_escalation_pattern': 'Privilege escalation attempt detected',
+            'data_exfiltration_pattern': 'Data exfiltration indicators detected',
+            'suspicious_file_access': 'Excessive file access detected',
+            'sensitive_data_access': 'Sensitive data accessed'
         }
 
 

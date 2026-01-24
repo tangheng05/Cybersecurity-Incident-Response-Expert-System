@@ -93,6 +93,160 @@ def seed_rules_new_engine():
             'symbolic_conditions': ['sustained_attack', 'high_value_target'],
             'conclusion': 'apt_attack',
             'cf': 0.78
+        },
+        {
+            'name': 'SQL Injection Detected',
+            'attack_type': 'sql_injection',
+            'symbolic_conditions': ['sql_injection_pattern'],
+            'conclusion': 'sql_injection_attack',
+            'cf': 0.90
+        },
+        {
+            'name': 'High Severity SQL Injection',
+            'attack_type': 'sql_injection',
+            'symbolic_conditions': ['sql_injection_pattern', 'elevated_severity'],
+            'conclusion': 'sql_injection_attack',
+            'cf': 0.95
+        },
+        {
+            'name': 'Web Service SQL Injection',
+            'attack_type': 'sql_injection',
+            'symbolic_conditions': ['sql_injection_pattern', 'web_service'],
+            'conclusion': 'sql_injection_attack',
+            'cf': 0.93
+        },
+        {
+            'name': 'XSS Pattern Detected',
+            'attack_type': 'xss',
+            'symbolic_conditions': ['xss_pattern'],
+            'conclusion': 'xss_attack',
+            'cf': 0.88
+        },
+        {
+            'name': 'High Severity XSS',
+            'attack_type': 'xss',
+            'symbolic_conditions': ['xss_pattern', 'elevated_severity'],
+            'conclusion': 'xss_attack',
+            'cf': 0.93
+        },
+        {
+            'name': 'Web Service XSS Attack',
+            'attack_type': 'xss',
+            'symbolic_conditions': ['xss_pattern', 'web_service'],
+            'conclusion': 'xss_attack',
+            'cf': 0.91
+        },
+        {
+            'name': 'Port Scan Detected',
+            'attack_type': 'port_scan',
+            'symbolic_conditions': ['port_scan_pattern'],
+            'conclusion': 'port_scan_attack',
+            'cf': 0.85
+        },
+        {
+            'name': 'Extensive Port Scan',
+            'attack_type': 'port_scan',
+            'symbolic_conditions': ['port_scan_pattern', 'high_connections'],
+            'conclusion': 'port_scan_attack',
+            'cf': 0.92
+        },
+        {
+            'name': 'External Port Scan',
+            'attack_type': 'port_scan',
+            'symbolic_conditions': ['port_scan_pattern', 'external_source'],
+            'conclusion': 'port_scan_attack',
+            'cf': 0.89
+        },
+        {
+            'name': 'Malware Detected',
+            'attack_type': 'malware',
+            'symbolic_conditions': ['malware_pattern'],
+            'conclusion': 'malware_attack',
+            'cf': 0.87
+        },
+        {
+            'name': 'High Severity Malware',
+            'attack_type': 'malware',
+            'symbolic_conditions': ['malware_pattern', 'elevated_severity'],
+            'conclusion': 'malware_attack',
+            'cf': 0.94
+        },
+        {
+            'name': 'Malware with Data Access',
+            'attack_type': 'malware',
+            'symbolic_conditions': ['malware_pattern', 'suspicious_file_access'],
+            'conclusion': 'malware_attack',
+            'cf': 0.91
+        },
+        {
+            'name': 'Phishing Attempt Detected',
+            'attack_type': 'phishing',
+            'symbolic_conditions': ['phishing_pattern'],
+            'conclusion': 'phishing_attack',
+            'cf': 0.86
+        },
+        {
+            'name': 'Targeted Phishing',
+            'attack_type': 'phishing',
+            'symbolic_conditions': ['phishing_pattern', 'high_value_target'],
+            'conclusion': 'phishing_attack',
+            'cf': 0.92
+        },
+        {
+            'name': 'Email Service Phishing',
+            'attack_type': 'phishing',
+            'symbolic_conditions': ['phishing_pattern', 'email_service'],
+            'conclusion': 'phishing_attack',
+            'cf': 0.90
+        },
+        {
+            'name': 'Privilege Escalation Detected',
+            'attack_type': 'privilege_escalation',
+            'symbolic_conditions': ['privilege_escalation_pattern'],
+            'conclusion': 'privilege_escalation_attack',
+            'cf': 0.88
+        },
+        {
+            'name': 'Admin Account Escalation',
+            'attack_type': 'privilege_escalation',
+            'symbolic_conditions': ['privilege_escalation_pattern', 'admin_target'],
+            'conclusion': 'privilege_escalation_attack',
+            'cf': 0.95
+        },
+        {
+            'name': 'Internal Privilege Escalation',
+            'attack_type': 'privilege_escalation',
+            'symbolic_conditions': ['privilege_escalation_pattern', 'internal_source'],
+            'conclusion': 'privilege_escalation_attack',
+            'cf': 0.91
+        },
+        {
+            'name': 'Data Exfiltration Detected',
+            'attack_type': 'data_exfiltration',
+            'symbolic_conditions': ['data_exfiltration_pattern'],
+            'conclusion': 'data_exfiltration_attack',
+            'cf': 0.89
+        },
+        {
+            'name': 'High Volume Data Transfer',
+            'attack_type': 'data_exfiltration',
+            'symbolic_conditions': ['data_exfiltration_pattern', 'high_bandwidth'],
+            'conclusion': 'data_exfiltration_attack',
+            'cf': 0.93
+        },
+        {
+            'name': 'External Data Exfiltration',
+            'attack_type': 'data_exfiltration',
+            'symbolic_conditions': ['data_exfiltration_pattern', 'external_target'],
+            'conclusion': 'data_exfiltration_attack',
+            'cf': 0.96
+        },
+        {
+            'name': 'Suspicious File Transfer',
+            'attack_type': 'data_exfiltration',
+            'symbolic_conditions': ['suspicious_file_access', 'external_target', 'elevated_severity'],
+            'conclusion': 'data_exfiltration_attack',
+            'cf': 0.90
         }
     ]
     

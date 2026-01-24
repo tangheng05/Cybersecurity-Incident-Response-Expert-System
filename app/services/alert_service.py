@@ -45,6 +45,63 @@ class AlertService:
                 'Review network traffic for data exfiltration',
                 'Reset credentials for all privileged accounts',
                 'Engage incident response team'
+            ],
+            'sql_injection_attack': [
+                'Block malicious IP address immediately',
+                'Review and sanitize all database queries',
+                'Enable Web Application Firewall (WAF)',
+                'Check database logs for unauthorized access',
+                'Implement parameterized queries',
+                'Review application input validation'
+            ],
+            'xss_attack': [
+                'Block malicious IP address',
+                'Sanitize all user inputs',
+                'Implement Content Security Policy (CSP)',
+                'Review and encode output data',
+                'Enable XSS protection headers',
+                'Audit web application code'
+            ],
+            'port_scan_attack': [
+                'Block source IP address',
+                'Review firewall rules',
+                'Enable port scan detection',
+                'Monitor for follow-up attacks',
+                'Restrict unnecessary open ports',
+                'Review network segmentation'
+            ],
+            'malware_attack': [
+                'Isolate infected systems immediately',
+                'Run full antivirus scan',
+                'Block malicious file hashes',
+                'Review endpoint protection logs',
+                'Check for lateral movement',
+                'Restore from clean backup if necessary'
+            ],
+            'phishing_attack': [
+                'Block sender email address',
+                'Alert affected users',
+                'Review email security policies',
+                'Implement email authentication (SPF, DKIM, DMARC)',
+                'Conduct security awareness training',
+                'Check for compromised credentials'
+            ],
+            'privilege_escalation_attack': [
+                'Revoke elevated privileges immediately',
+                'Review user access logs',
+                'Reset affected account credentials',
+                'Audit privilege assignment policies',
+                'Enable privileged access monitoring',
+                'Investigate root cause'
+            ],
+            'data_exfiltration_attack': [
+                'Block data transfer immediately',
+                'Isolate affected systems',
+                'Review Data Loss Prevention (DLP) logs',
+                'Identify exfiltrated data',
+                'Notify security team and management',
+                'Conduct forensic analysis',
+                'Implement egress filtering'
             ]
         }
         
@@ -133,15 +190,26 @@ class AlertService:
         attack_type_id = None
         
         if conclusions_dict:
-            sorted_conclusions = sorted(conclusions_dict.items(), key=lambda x: x[1], reverse=True)
-            top_conclusion_name = sorted_conclusions[0][0]
-            top_cf = sorted_conclusions[0][1]
+            # Filter out None/NULL conclusions before sorting
+            valid_conclusions = {k: v for k, v in conclusions_dict.items() if k is not None}
+            
+            if valid_conclusions:
+                sorted_conclusions = sorted(valid_conclusions.items(), key=lambda x: x[1], reverse=True)
+                top_conclusion_name = sorted_conclusions[0][0]
+                top_cf = sorted_conclusions[0][1]
             
             conclusion_to_attack = {
                 'brute_force_attack': 'brute_force',
                 'credential_stuffing': 'brute_force',
                 'ddos_attack': 'ddos',
-                'apt_attack': 'unauthorized_access'
+                'apt_attack': 'unauthorized_access',
+                'sql_injection_attack': 'sql_injection',
+                'xss_attack': 'xss',
+                'port_scan_attack': 'port_scan',
+                'malware_attack': 'malware',
+                'phishing_attack': 'phishing',
+                'privilege_escalation_attack': 'privilege_escalation',
+                'data_exfiltration_attack': 'data_exfiltration'
             }
             
             attack_name = conclusion_to_attack.get(top_conclusion_name)

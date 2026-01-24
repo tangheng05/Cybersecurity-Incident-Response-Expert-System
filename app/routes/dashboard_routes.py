@@ -36,8 +36,8 @@ def index():
             
             alert = Alert(
                 source_ip=request.form.get('source_ip'),
-                destination_ip=None,
-                alert_type='Analyzing',
+                destination_ip=request.form.get('destination_ip'),
+                alert_type='Analyzing',  # Initial type - will be set by inference engine
                 severity=request.form.get('severity'),
                 raw_data=raw_data,
                 status='new'

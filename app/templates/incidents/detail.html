@@ -139,7 +139,12 @@ endblock %} {% block content %}
               <div>
                 <h6 class="mb-1">{{ rule.name }}</h6>
                 <p class="mb-1 text-muted small">
-                  {{ rule.conclusion or 'N/A' }}
+                  Conclusion: {{ rule.conclusion.replace('_', ' ').title() if
+                  rule.conclusion else 'N/A' }}
+                </p>
+                <p class="mb-1 text-muted small">
+                  Conditions: {{ rule.symbolic_conditions|join(', ') if
+                  rule.symbolic_conditions else 'N/A' }}
                 </p>
               </div>
               <div>

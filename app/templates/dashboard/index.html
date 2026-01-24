@@ -225,12 +225,14 @@ block extra_css %}
             />
           </div>
           <div class="col-md-6">
-            <label class="form-label">Alert Type</label>
-            <select name="alert_type" id="alert_type" class="form-control" required>
-              {% for attack_type in attack_types %}
-              <option value="{{ attack_type.name }}">{{ attack_type.name.replace('_', ' ').title() }}</option>
-              {% endfor %}
-            </select>
+            <label class="form-label">Destination IP (Optional)</label>
+            <input
+              type="text"
+              name="destination_ip"
+              id="destination_ip"
+              class="form-control"
+              placeholder="e.g., 10.0.0.1"
+            />
           </div>
         </div>
 
@@ -245,13 +247,14 @@ block extra_css %}
             </select>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Destination IP (Optional)</label>
+            <label class="form-label">Failed Login Attempts</label>
             <input
-              type="text"
-              name="destination_ip"
-              id="destination_ip"
+              type="number"
+              name="failed_attempts"
+              id="failed_attempts"
               class="form-control"
-              placeholder="e.g., 10.0.0.1"
+              placeholder="e.g., 5"
+              min="0"
             />
           </div>
         </div>

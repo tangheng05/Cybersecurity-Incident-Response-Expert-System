@@ -112,10 +112,15 @@ endblock %} {% block content %}
               </a>
             </td>
             <td>
-              {% if incident.attack_type_id %}
+              {% if incident.attack_type %}
               <span class="badge bg-danger">
-                <i class="fas fa-bug me-1"></i>Type {{ incident.attack_type_id
-                }}
+                <i class="fas fa-bug me-1"></i>{{
+                incident.attack_type.name.replace('_', ' ').title() }}
+              </span>
+              {% elif incident.conclusions and incident.conclusions|length > 0 and incident.conclusions[0].get('conclusion') %}
+              <span class="badge bg-warning">
+                <i class="fas fa-question-circle me-1"></i>{{
+                incident.conclusions[0]['conclusion'].replace('_', ' ').title() }}
               </span>
               {% else %}
               <span class="badge bg-secondary">Unknown</span>
@@ -124,6 +129,7 @@ endblock %} {% block content %}
             <td style="width: 15%">
               <div class="d-flex align-items-center">
                 <div class="progress flex-grow-1" style="height: 6px">
+                  {% if incident.attack_type %}
                   {% set cf_percent = (incident.final_cf * 100)|int if
                   incident.final_cf else 0 %}
                   <div
@@ -134,10 +140,25 @@ endblock %} {% block content %}
                     aria-valuemin="0"
                     aria-valuemax="100"
                   ></div>
+                  {% else %}
+                  <!-- Unknown attack type - show 0 confidence -->
+                  <div
+                    class="progress-bar bg-secondary"
+                    role="progressbar"
+                    style="width: 0%"
+                    aria-valuenow="0"
+                    aria-valuemin="0"
+                    aria-valuemax="100"
+                  ></div>
+                  {% endif %}
                 </div>
-                <span class="ms-2 small text-muted"
-                  >{{ "%.2f"|format(incident.final_cf) if incident.final_cf else
-                  '0.00' }}</span
+                <span class="ms-2" style="min-width: 50px; font-size: 0.9em">
+                  {% if incident.attack_type %}
+                  {{ "%.2f"|format(incident.final_cf) if incident.final_cf else
+                  '0.00' }}
+                  {% else %}
+                  N/A
+                  {% endif %}
                 >
               </div>
             </td>
