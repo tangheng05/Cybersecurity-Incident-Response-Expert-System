@@ -219,7 +219,6 @@ class FactExtractor:
             derived.add('apt_pattern')
         
         return derived
-    def _is_private_ip(ip: str) -> bool:
     
     @staticmethod
     def _is_private_ip(ip: str) -> bool:
@@ -229,83 +228,72 @@ class FactExtractor:
                 return False
             
             first = int(parts[0])
-            second = int(parts[1])10:
+            second = int(parts[1])
+            
+            if first == 10:
                 return True
             
-            # 172.16.0.0/12
             if first == 172 and 16 <= second <= 31:
                 return True
             
             if first == 192 and second == 168:
                 return True
             
-            # Loopback
             if first == 127:
                 return True
             
             return False
-    return {
-            'high_fai
+        except:
+            return False
+    
+    @staticmethod
     def get_fact_descriptions() -> Dict[str, str]:
-        """
-        Useful for UI displed_attempts': 'Failed login attempts ≥ 5',
+        return {
+            'high_failed_attempts': 'Failed login attempts ≥ 5',
             'very_high_failed_attempts': 'Failed login attempts ≥ 10',
             'extreme_failed_attempts': 'Failed login attempts ≥ 20',
-            
-            # Timespan
             'short_timespan': 'Attack window ≤ 5 minutes',
             'very_short_timespan': 'Attack window ≤ 2 minutes',
-            
-            # Traffic rate
             'high_traffic_rate': 'Requests/second ≥ 100',
             'very_high_traffic_rate': 'Requests/second ≥ 500',
             'extreme_traffic_rate': 'Requests/second ≥ 1000',
+            'high_bandwidth': 'Bandwidth usage ≥ 100 Mbps',
             'very_high_bandwidth': 'Bandwidth usage ≥ 500 Mbps',
-            
-            # Connections
-            'higtions': 'Active connections ≥ 500',
-            
+            'high_connections': 'Active connections ≥ 100',
+            'very_high_connections': 'Active connections ≥ 500',
             'ssh_service': 'Target service: SSH',
             'http_service': 'Target service: HTTP',
             'https_service': 'Target service: HTTPS',
             'rdp_service': 'Target service: RDP',
             'remote_access_service': 'Remote access protocol targeted',
             'web_service': 'Web service targeted',
-            
             'admin_target': 'Administrator account targeted',
             'high_value_target': 'High-value account targeted',
-            
-            'elevated_severity': 'Alert severity is high or
-            ritical',
+            'elevated_severity': 'Alert severity is high or critical',
             'high_severity': 'High severity alert',
-            'critical_severity': 'Critical severity alert',et
+            'critical_severity': 'Critical severity alert',
+            'has_source_ip': 'Source IP identified',
             'external_source': 'Attack from external IP',
             'internal_source': 'Attack from internal IP',
-            
-            'rapid_bru'has_source_ip': 'Source IP identified',
-            te_force_pattern': 'High login failures in short time',
+            'rapid_brute_force_pattern': 'High login failures in short time',
             'aggressive_brute_force_pattern': 'Very aggressive brute force attempt',
             'ssh_brute_force_pattern': 'SSH-specific brute force',
             'volumetric_attack_pattern': 'High traffic + high connections',
             'severe_ddos_pattern': 'Extreme DDoS indicators',
+            'sustained_attack': 'Attack duration > 1 hour',
+            'repeat_offender': 'Known repeat attacker'
+        }
 
 
 def print_facts(alert: Alert) -> None:
     facts = FactExtractor.extract_facts(alert)
-    descriptions = Fac
-def print_facts(alert: Alert) -> None:
-    """Pretty-print extracted facts for debugging
+    descriptions = FactExtractor.get_fact_descriptions()
+    
     print(f"{'='*60}")
     print(f"Source IP: {alert.source_ip}")
     print(f"Severity: {alert.severity}")
+    print(f"\nFacts ({len(facts)}):")
     for fact in sorted(facts):
         desc = descriptions.get(fact, 'No description')
         print(f"  ✓ {fact}: {desc}")
-    
-    print(f"{'='*60}\n")")
-    print(f"\nFacts ({len(facts)}):")
-        desc = descriptions.get(fact, 'No description')
-        print(f"  ✓ {fact}: {desc}")
-    
     print(f"{'='*60}\n")
-def print_facts(alert: Alert) -> None:

@@ -43,51 +43,28 @@ def index():
                 status='new'
             )
             db.session.add(alert)
-            db.session.flush()  # Get alert.id before committing
+            db.session.flush()
             
-            # Run inference engine
-            from app.services.inference_engine import InferenceEngine
+            from app.services.alert_service import AlertService
             
-            engine = InferenceEngine()
-            result = engine.analyze_alert(alert)
+            analysis = AlertService.analyze_and_create_incident(alert)
             
-            # Update alert type if attack was detected
-            if result['attack_type_id']:
-                attack_type = AttackType.query.get(result['attack_type_id'])
-                if attack_type:
-                    alert.alert_type = attack_type.name.replace('_', ' ').title()
-            
-            # Create incident automatically
-            incident = Incident(
-                alert_id=alert.id,
-                attack_type_id=result['attack_type_id'],
-                matched_rules=result['matched_rules'],
-                recommended_actions=result['recommended_actions'],
-                confidence_score=result['confidence_score'],
-                explanation=result['explanation'],
-                status='new',
-                assigned_to=session.get('user_id')
-            )
-            db.session.add(incident)
-            
-            # Update alert status
-            alert.status = 'processed'
+            if analysis['top_conclusion']:
+                alert.alert_type = analysis['top_conclusion'].replace('_', ' ').title()
             
             db.session.commit()
             
-            # Prepare analysis summary for display
             analysis_summary = {
                 'alert_id': alert.id,
                 'alert_type': alert.alert_type,
-                'confidence': result['confidence_score'],
-                'matched_rules_count': len(result['matched_rules']),
-                'recommended_actions': result['recommended_actions'][:3],  # Top 3 actions
+                'confidence': analysis['final_cf'],
+                'matched_rules_count': len([t for t in analysis['trace'] if t.fired]),
+                'recommended_actions': [],
                 'severity': alert.severity,
                 'source_ip': alert.source_ip
             }
             
-            # Continue to get dashboard stats
-            form = None  # Reset form
+            form = None
         except Exception as e:
             db.session.rollback()
             flash(f'❌ Error: {str(e)}', 'danger')

@@ -34,14 +34,16 @@ def create():
     
     if form.validate_on_submit():
         try:
+            symbolic_conditions = [c.strip() for c in form.symbolic_conditions.data.strip().split('\n') if c.strip()]
+            
             data = {
                 'name': form.name.data,
                 'attack_type_id': form.attack_type_id.data,
-                'conditions': json.loads(form.conditions.data),
-                'actions': json.loads(form.actions.data),
+                'symbolic_conditions': symbolic_conditions,
+                'conclusion': form.conclusion.data,
+                'cf': form.cf.data,
                 'priority': form.priority.data,
                 'severity_score': form.severity_score.data,
-                'match_threshold': form.match_threshold.data,
                 'is_active': form.is_active.data,
             }
             rule = RuleService.create(data)
@@ -68,14 +70,16 @@ def edit(rule_id: int):
     
     if form.validate_on_submit():
         try:
+            symbolic_conditions = [c.strip() for c in form.symbolic_conditions.data.strip().split('\n') if c.strip()]
+            
             data = {
                 'name': form.name.data,
                 'attack_type_id': form.attack_type_id.data,
-                'conditions': json.loads(form.conditions.data),
-                'actions': json.loads(form.actions.data),
+                'symbolic_conditions': symbolic_conditions,
+                'conclusion': form.conclusion.data,
+                'cf': form.cf.data,
                 'priority': form.priority.data,
                 'severity_score': form.severity_score.data,
-                'match_threshold': form.match_threshold.data,
                 'is_active': form.is_active.data,
             }
             RuleService.update(rule, data)
@@ -86,11 +90,10 @@ def edit(rule_id: int):
         except Exception as e:
             flash(f'Error updating rule: {str(e)}', 'danger')
     
-    # Pre-fill JSON fields
     if not form.is_submitted():
-        form.conditions.data = json.dumps(rule.conditions, indent=2)
-        form.actions.data = json.dumps(rule.actions, indent=2)
-        form.match_threshold.data = int(rule.match_threshold * 100)  # Convert 0.7 -> 70
+        form.symbolic_conditions.data = '\n'.join(rule.symbolic_conditions or [])
+        form.conclusion.data = rule.conclusion
+        form.cf.data = rule.cf
     
     return render_template('rules/edit.html', form=form, rule=rule)
 

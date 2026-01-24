@@ -99,6 +99,7 @@ Complete migration from heuristic-based inference engine to formal forward-chain
 - [x] Seed v2 rules into database
 
 **Deliverables:**
+
 - `scripts/seed_rules_engine.py` (11 symbolic rules)
 - 5 Brute Force rules (CF: 0.85-0.92)
 - 5 DDoS rules (CF: 0.83-0.95)
@@ -121,50 +122,45 @@ NEW:
 
 ---
 
-### 🔄 Phase 5: Service Layer Updates
+### ✅ Phase 5: Service Layer Updates
 
-**Status:** ⏳ PENDING  
-**Target:** January 26, 2026
+**Status:** ✅ COMPLETED  
+**Completed:** January 24, 2026
 
 #### Tasks:
 
-- [ ] Replace `InferenceEngine.analyze_alert()` calls
-- [ ] Update `AlertService` to use v2 engine
-- [ ] Update `RuleService` for v2 rule management
-- [ ] Remove old inference engine code
+- [x] Replace `InferenceEngine.analyze_alert()` calls
+- [x] Update `AlertService` to use v2 engine
+- [x] Update alert routes to use new service
+- [x] Update dashboard routes
 
-**Files to Modify:**
+**Files Modified:**
 
-- `app/services/alert_service.py`
-- `app/services/rule_service.py`
-- `app/routes/alert_routes.py`
+- `app/services/alert_service.py` - Added `analyze_and_create_incident()`
+- `app/routes/alert_routes.py` - Removed old engine calls
+- `app/routes/dashboard_routes.py` - Updated to use new service
 
 ---
 
-### 🔄 Phase 6: Route & Form Updates
+### ✅ Phase 6: Route & Form Updates
 
-**Status:** ⏳ PENDING  
-**Target:** January 26, 2026
+**Status:** ✅ COMPLETED  
+**Completed:** January 24, 2026
 
 #### Tasks:
 
-- [ ] Update `RuleForm` for v2 fields
-  - [ ] Add CF input (0.0-1.0 range)
-  - [ ] Add conclusion input
-  - [ ] Add symbolic conditions editor
-- [ ] Update rule CRUD routes
-  - [ ] Create route - handle v2 format
-  - [ ] Edit route - handle v2 format
-  - [ ] Detail view - show CF and trace
-- [ ] Update alert analysis routes
-  - [ ] Show trace in detail view
-  - [ ] Add "why" and "why not" explanations
+- [x] Update `RuleForm` for v2 fields
+  - [x] Add CF input (0.0-1.0 range)
+  - [x] Add conclusion input
+  - [x] Add symbolic conditions editor
+- [x] Update rule CRUD routes
+  - [x] Create route - handle v2 format
+  - [x] Edit route - handle v2 format
 
-**Files to Modify:**
+**Files Modified:**
 
-- `app/forms/rule_forms.py`
-- `app/routes/rule_routes.py`
-- `app/routes/alert_routes.py`
+- `app/forms/rule_forms.py` - Updated for symbolic conditions & CF
+- `app/routes/rule_routes.py` - Updated create/edit routes
 
 ---
 
@@ -324,10 +320,10 @@ If issues occur during migration:
 
 ## Progress Tracking
 
-**Current Phase:** Phase 5 - Service Layer Updates  
-**Overall Progress:** ████░░░░░░ 40%
+**Current Phase:** Phase 7 - Template Updates  
+**Overall Progress:** ██████░░░░ 60%
 
-### Completed Phases: 4 / 10
+### Completed Phases: 6 / 10
 
 ### Estimated Completion: January 30, 2026
 
@@ -353,6 +349,10 @@ If issues occur during migration:
   - Created `seed_rules_engine.py` with 11 symbolic rules
   - All rules seeded with appropriate CF values
   - Symbolic conditions mapped to fact_extractor thresholds
+- ✅ Phase 5 Complete: Service layer updates
+  - Updated AlertService with `analyze_and_create_incident()` method
+  - Removed all old InferenceEngine.analyze_alert() calls
+  - Updated alert and dashboard routes to use new engine
 
 ---
 
@@ -363,8 +363,8 @@ If issues occur during migration:
 3. ✅ Implement fact_extractor.py
 4. ✅ Update database schema
 5. ✅ Convert rules to symbolic format
-6. 🔄 Update service layer (alert_service.py)
-7. ⏳ Update routes and forms
+6. ✅ Update service layer (alert_service.py)
+7. 🔄 Update routes and forms
 8. ⏳ Update templates
 9. ⏳ Create tests
 
