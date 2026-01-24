@@ -60,10 +60,9 @@ def export_data():
             rules_data.append({
                 'name': rule.name,
                 'attack_type_name': rule.attack_type.name,
-                'conditions': rule.conditions,
-                'actions': rule.actions,
-                'priority': rule.priority,
-                'severity_score': rule.severity_score,
+                'symbolic_conditions': rule.symbolic_conditions,
+                'conclusion': rule.conclusion,
+                'cf': rule.cf,
                 'is_active': rule.is_active
             })
         

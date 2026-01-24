@@ -17,8 +17,8 @@ endblock %} {% block content %}
         <th style="width: 50px">ID</th>
         <th>Rule Name</th>
         <th>Attack Type</th>
-        <th>Priority</th>
-        <th>Severity</th>
+        <th>Conclusion</th>
+        <th>CF</th>
         <th>Status</th>
         <th style="width: 180px">Actions</th>
       </tr>
@@ -44,15 +44,19 @@ endblock %} {% block content %}
           {% endif %}
         </td>
         <td>
-          {% if rule.priority == 'high' %}
-          <span class="badge bg-danger">High</span>
-          {% elif rule.priority == 'medium' %}
-          <span class="badge bg-warning text-dark">Medium</span>
+          <span class="badge bg-secondary">{{ rule.conclusion or 'N/A' }}</span>
+        </td>
+        <td>
+          {% if rule.cf %}
+          <span
+            class="badge {% if rule.cf >= 0.9 %}bg-success{% elif rule.cf >= 0.7 %}bg-warning{% else %}bg-secondary{% endif %}"
+          >
+            {{ "%.2f"|format(rule.cf) }}
+          </span>
           {% else %}
-          <span class="badge bg-secondary">Low</span>
+          <span class="badge bg-secondary">N/A</span>
           {% endif %}
         </td>
-        <td><span class="badge bg-dark">{{ rule.severity_score }}/10</span></td>
         <td>
           {% if rule.is_active %}
           <span class="badge bg-success">Active</span>
@@ -145,8 +149,14 @@ endblock %} {% block content %}
               border-left: 4px solid #0d6efd;
               transition: all 0.3s ease;
             "
-            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+            onmouseover="
+              this.style.transform = 'translateY(-4px)';
+              this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            "
+            onmouseout="
+              this.style.transform = 'translateY(0)';
+              this.style.boxShadow = 'none';
+            "
           >
             <div class="d-flex align-items-center justify-content-between mb-3">
               <h6
@@ -203,8 +213,14 @@ endblock %} {% block content %}
               border-left: 4px solid #198754;
               transition: all 0.3s ease;
             "
-            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+            onmouseover="
+              this.style.transform = 'translateY(-4px)';
+              this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            "
+            onmouseout="
+              this.style.transform = 'translateY(0)';
+              this.style.boxShadow = 'none';
+            "
           >
             <div class="d-flex align-items-center justify-content-between mb-3">
               <h6
@@ -261,8 +277,14 @@ endblock %} {% block content %}
               border-left: 4px solid #dc3545;
               transition: all 0.3s ease;
             "
-            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+            onmouseover="
+              this.style.transform = 'translateY(-4px)';
+              this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            "
+            onmouseout="
+              this.style.transform = 'translateY(0)';
+              this.style.boxShadow = 'none';
+            "
           >
             <div class="d-flex align-items-center justify-content-between mb-3">
               <h6
@@ -275,7 +297,7 @@ endblock %} {% block content %}
                   font-weight: 600;
                 "
               >
-                High Priority
+                High CF Rules
               </h6>
               <i
                 class="fas fa-exclamation-triangle"
@@ -291,8 +313,8 @@ endblock %} {% block content %}
                   line-height: 1;
                 "
               >
-                {{ rules|selectattr('priority', 'equalto', 'high')|list|length
-                }}
+                {{ rules|selectattr('cf', 'defined')|selectattr('cf', 'ne',
+                none)|selectattr('cf', 'ge', 0.9)|list|length }}
               </span>
               <span
                 style="
@@ -301,7 +323,7 @@ endblock %} {% block content %}
                   margin-left: 6px;
                 "
               >
-                critical
+                CF ≥ 0.9
               </span>
             </div>
           </div>
@@ -320,8 +342,14 @@ endblock %} {% block content %}
               border-left: 4px solid #6f42c1;
               transition: all 0.3s ease;
             "
-            onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 16px rgba(0,0,0,0.1)';"
-            onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';"
+            onmouseover="
+              this.style.transform = 'translateY(-4px)';
+              this.style.boxShadow = '0 8px 16px rgba(0,0,0,0.1)';
+            "
+            onmouseout="
+              this.style.transform = 'translateY(0)';
+              this.style.boxShadow = 'none';
+            "
           >
             <div class="d-flex align-items-center justify-content-between mb-3">
               <h6

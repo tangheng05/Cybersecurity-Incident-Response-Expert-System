@@ -137,6 +137,7 @@ block extra_css %}
         "
       >
         <strong style="color: var(--text-primary)">Recommended Actions:</strong>
+        {% if analysis_summary.recommended_actions %}
         <ul
           style="
             margin: 0.5rem 0 0 0;
@@ -148,6 +149,9 @@ block extra_css %}
           <li>{{ action.replace('_', ' ').title() }}</li>
           {% endfor %}
         </ul>
+        {% else %}
+        <p class="text-muted mb-0 mt-2">No recommended actions available.</p>
+        {% endif %}
       </div>
     </div>
     {% endif %}
@@ -313,7 +317,7 @@ block extra_css %}
   // Toggle chevron icon and border-radius on collapse
   const collapseElement = document.getElementById("incidentAnalysisForm");
   const headerElement = document.querySelector(
-    "#incidentAnalysisCard .card-header"
+    "#incidentAnalysisCard .card-header",
   );
 
   collapseElement.addEventListener("show.bs.collapse", function () {
@@ -707,10 +711,13 @@ block extra_css %}
                   {% endif %}
                 </td>
                 <td>
+                  {% set cf_percent = (incident.final_cf * 100)|int if
+                  incident.final_cf else 0 %}
                   <span
-                    class="badge {% if incident.confidence_score >= 80 %}bg-success{% elif incident.confidence_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                    class="badge {% if cf_percent >= 80 %}bg-success{% elif cf_percent >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
                   >
-                    {{ incident.confidence_score }}%
+                    {{ "%.2f"|format(incident.final_cf) if incident.final_cf
+                    else '0.00' }}
                   </span>
                 </td>
                 <td>

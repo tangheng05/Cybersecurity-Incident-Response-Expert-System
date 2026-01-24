@@ -89,39 +89,11 @@ block content %}
         >
       </div>
 
-      <!-- Priority and Severity -->
-      <div class="row">
-        <div class="col-md-4">
-          <div class="mb-3">
-            {{ form.priority.label(class="form-label") }} {{
-            form.priority(class="form-select" + (" is-invalid" if
-            form.priority.errors else "")) }} {% if form.priority.errors %}
-            <div class="invalid-feedback">
-              {% for error in form.priority.errors %}{{ error }}{% endfor %}
-            </div>
-            {% endif %}
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="mb-3">
-            {{ form.severity_score.label(class="form-label") }} {{
-            form.severity_score(class="form-control" + (" is-invalid" if
-            form.severity_score.errors else "")) }} {% if
-            form.severity_score.errors %}
-            <div class="invalid-feedback">
-              {% for error in form.severity_score.errors %}{{ error }}{% endfor
-              %}
-            </div>
-            {% endif %}
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="mb-3 mt-4">
-            <div class="form-check">
-              {{ form.is_active(class="form-check-input") }} {{
-              form.is_active.label(class="form-check-label") }}
-            </div>
-          </div>
+      <!-- Active Status -->
+      <div class="mb-3">
+        <div class="form-check form-switch">
+          {{ form.is_active(class="form-check-input") }} {{
+          form.is_active.label(class="form-check-label") }}
         </div>
       </div>
 

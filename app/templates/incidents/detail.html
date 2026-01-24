@@ -51,7 +51,7 @@ endblock %} {% block content %}
             <div class="d-flex align-items-center gap-2">
               <div class="progress flex-grow-1" style="height: 25px">
                 {% set cf_percent = (incident.final_cf * 100)|int if
-                incident.final_cf else (incident.confidence_score or 0) %}
+                incident.final_cf else 0 %}
                 <div
                   class="progress-bar {% if cf_percent >= 80 %}bg-success {% elif cf_percent >= 50 %}bg-warning text-dark {% else %}bg-danger{% endif %}"
                   role="progressbar"
@@ -62,8 +62,7 @@ endblock %} {% block content %}
                 >
                   <strong
                     >{{ "%.2f"|format(incident.final_cf) if incident.final_cf
-                    else incident.confidence_score }}{% if not incident.final_cf
-                    %}%{% endif %}</strong
+                    else '0.00' }}</strong
                   >
                 </div>
               </div>
@@ -139,19 +138,18 @@ endblock %} {% block content %}
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <h6 class="mb-1">{{ rule.name }}</h6>
-                <p class="mb-1 text-muted small">{{ rule.conditions }}</p>
+                <p class="mb-1 text-muted small">
+                  {{ rule.conclusion or 'N/A' }}
+                </p>
               </div>
               <div>
-                {% if rule.priority == 'high' %}
-                <span class="badge bg-danger">High Priority</span>
-                {% elif rule.priority == 'medium' %}
-                <span class="badge bg-warning">Medium Priority</span>
-                {% else %}
-                <span class="badge bg-info">Low Priority</span>
-                {% endif %}
-                <span class="badge bg-secondary"
-                  >Severity: {{ rule.severity_score }}/10</span
+                {% if rule.cf %}
+                <span
+                  class="badge {% if rule.cf >= 0.9 %}bg-success{% elif rule.cf >= 0.7 %}bg-warning{% else %}bg-secondary{% endif %}"
                 >
+                  CF: {{ "%.2f"|format(rule.cf) }}
+                </span>
+                {% endif %}
               </div>
             </div>
           </div>

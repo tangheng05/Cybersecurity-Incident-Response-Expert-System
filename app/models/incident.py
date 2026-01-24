@@ -9,7 +9,7 @@ class Incident(db.Model):
     alert_id = db.Column(db.Integer, db.ForeignKey('alerts.id'), nullable=False, unique=True)
     attack_type_id = db.Column(db.Integer, db.ForeignKey('attack_types.id'), nullable=True)
     
-    # V2 Forward-Chaining Engine fields
+
     conclusions = db.Column(db.JSON, nullable=True)
     trace = db.Column(db.JSON, nullable=True)
     final_cf = db.Column(db.Float, nullable=True)

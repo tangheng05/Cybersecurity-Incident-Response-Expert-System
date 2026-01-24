@@ -22,99 +22,77 @@ def seed_rules_new_engine():
             'attack_type': 'brute_force',
             'symbolic_conditions': ['high_failed_attempts', 'short_timespan'],
             'conclusion': 'brute_force_attack',
-            'cf': 0.85,
-            'priority': 'high',
-            'severity_score': 8
+            'cf': 0.85
         },
         {
             'name': 'Very High Failed Attempts Rapid',
             'attack_type': 'brute_force',
             'symbolic_conditions': ['very_high_failed_attempts', 'very_short_timespan'],
             'conclusion': 'brute_force_attack',
-            'cf': 0.92,
-            'priority': 'high',
-            'severity_score': 9
+            'cf': 0.92
         },
         {
             'name': 'Admin Account Targeted Brute Force',
             'attack_type': 'brute_force',
             'symbolic_conditions': ['high_failed_attempts', 'admin_target'],
             'conclusion': 'brute_force_attack',
-            'cf': 0.88,
-            'priority': 'high',
-            'severity_score': 9
+            'cf': 0.88
         },
         {
             'name': 'SSH Brute Force Pattern',
             'attack_type': 'brute_force',
             'symbolic_conditions': ['ssh_service', 'high_failed_attempts', 'short_timespan'],
             'conclusion': 'brute_force_attack',
-            'cf': 0.90,
-            'priority': 'high',
-            'severity_score': 8
+            'cf': 0.90
         },
         {
             'name': 'Credential Stuffing Detected',
             'attack_type': 'brute_force',
             'symbolic_conditions': ['high_failed_attempts', 'repeat_offender'],
             'conclusion': 'credential_stuffing',
-            'cf': 0.87,
-            'priority': 'high',
-            'severity_score': 8
+            'cf': 0.87
         },
         {
             'name': 'High Traffic Volumetric Attack',
             'attack_type': 'ddos',
             'symbolic_conditions': ['high_traffic_rate', 'high_connections'],
             'conclusion': 'ddos_attack',
-            'cf': 0.83,
-            'priority': 'high',
-            'severity_score': 8
+            'cf': 0.83
         },
         {
             'name': 'Very High Traffic Severe DDoS',
             'attack_type': 'ddos',
             'symbolic_conditions': ['very_high_traffic_rate', 'very_high_connections'],
             'conclusion': 'ddos_attack',
-            'cf': 0.95,
-            'priority': 'high',
-            'severity_score': 10
+            'cf': 0.95
         },
         {
             'name': 'Bandwidth Exhaustion Attack',
             'attack_type': 'ddos',
             'symbolic_conditions': ['high_bandwidth', 'high_traffic_rate'],
             'conclusion': 'ddos_attack',
-            'cf': 0.88,
-            'priority': 'high',
-            'severity_score': 9
+            'cf': 0.88
         },
         {
             'name': 'External Flood Attack',
             'attack_type': 'ddos',
             'symbolic_conditions': ['external_source', 'high_traffic_rate', 'high_connections'],
             'conclusion': 'ddos_attack',
-            'cf': 0.90,
-            'priority': 'high',
-            'severity_score': 9
+            'cf': 0.90
         },
         {
             'name': 'Extreme Traffic Attack',
             'attack_type': 'ddos',
             'symbolic_conditions': ['extreme_traffic_rate'],
             'conclusion': 'ddos_attack',
-            'cf': 0.93,
-            'priority': 'high',
-            'severity_score': 10
+            'cf': 0.93
         },
         {
             'name': 'Sustained High Value Target Attack',
             'attack_type': 'unauthorized_access',
             'symbolic_conditions': ['sustained_attack', 'high_value_target'],
             'conclusion': 'apt_attack',
-            'cf': 0.78,
-            'priority': 'high',
-            'severity_score': 9
+            'cf': 0.78
         }
     ]
     
@@ -136,8 +114,6 @@ def seed_rules_new_engine():
             existing.symbolic_conditions = data['symbolic_conditions']
             existing.conclusion = data['conclusion']
             existing.cf = data['cf']
-            existing.priority = data.get('priority', existing.priority)
-            existing.severity_score = data.get('severity_score', existing.severity_score)
             existing.is_active = True
             updated_count += 1
             print(f"  ✓ Updated rule: {data['name']} (CF={data['cf']})")

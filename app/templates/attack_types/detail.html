@@ -79,8 +79,8 @@ Attack Type Details{% endblock %} {% block content %}
       <thead>
         <tr>
           <th>Rule Name</th>
-          <th>Priority</th>
-          <th>Severity</th>
+          <th>Conclusion</th>
+          <th>Certainty Factor (CF)</th>
           <th>Status</th>
           <th>Actions</th>
         </tr>
@@ -89,9 +89,15 @@ Attack Type Details{% endblock %} {% block content %}
         {% for rule in attack_type.rules %}
         <tr>
           <td>{{ rule.name }}</td>
-          <td><span class="badge bg-info">{{ rule.priority }}</span></td>
           <td>
-            <span class="badge bg-danger">{{ rule.severity_score }}</span>
+            <span class="badge bg-info">{{ rule.conclusion or 'N/A' }}</span>
+          </td>
+          <td>
+            <span
+              class="badge bg-{% if rule.cf and rule.cf >= 0.8 %}success{% elif rule.cf and rule.cf >= 0.5 %}warning{% else %}secondary{% endif %}"
+            >
+              {{ "%.2f"|format(rule.cf) if rule.cf else 'N/A' }}
+            </span>
           </td>
           <td>
             {% if rule.is_active %}

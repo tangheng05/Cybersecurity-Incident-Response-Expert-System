@@ -124,17 +124,20 @@ endblock %} {% block content %}
             <td style="width: 15%">
               <div class="d-flex align-items-center">
                 <div class="progress flex-grow-1" style="height: 6px">
+                  {% set cf_percent = (incident.final_cf * 100)|int if
+                  incident.final_cf else 0 %}
                   <div
-                    class="progress-bar {% if incident.confidence_score >= 80 %}bg-success{% elif incident.confidence_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
+                    class="progress-bar {% if cf_percent >= 80 %}bg-success{% elif cf_percent >= 50 %}bg-warning{% else %}bg-danger{% endif %}"
                     role="progressbar"
-                    style="width: {{ incident.confidence_score }}%"
-                    aria-valuenow="{{ incident.confidence_score }}"
+                    style="width: {{ cf_percent }}%"
+                    aria-valuenow="{{ cf_percent }}"
                     aria-valuemin="0"
                     aria-valuemax="100"
                   ></div>
                 </div>
                 <span class="ms-2 small text-muted"
-                  >{{ incident.confidence_score }}%</span
+                  >{{ "%.2f"|format(incident.final_cf) if incident.final_cf else
+                  '0.00' }}</span
                 >
               </div>
             </td>

@@ -34,20 +34,22 @@
         >
       </dd>
 
-      <dt class="col-sm-3">Priority</dt>
+      <dt class="col-sm-3">Conclusion</dt>
       <dd class="col-sm-9">
-        {% if rule.priority == 'high' %}
-        <span class="badge bg-danger">High</span>
-        {% elif rule.priority == 'medium' %}
-        <span class="badge bg-warning text-dark">Medium</span>
-        {% else %}
-        <span class="badge bg-secondary">Low</span>
-        {% endif %}
+        <span class="badge bg-secondary">{{ rule.conclusion or 'N/A' }}</span>
       </dd>
 
-      <dt class="col-sm-3">Severity Score</dt>
+      <dt class="col-sm-3">Certainty Factor (CF)</dt>
       <dd class="col-sm-9">
-        <span class="badge bg-dark">{{ rule.severity_score }}/10</span>
+        {% if rule.cf %}
+        <span
+          class="badge {% if rule.cf >= 0.9 %}bg-success{% elif rule.cf >= 0.7 %}bg-warning{% else %}bg-secondary{% endif %}"
+        >
+          {{ "%.2f"|format(rule.cf) }}
+        </span>
+        {% else %}
+        <span class="badge bg-secondary">N/A</span>
+        {% endif %}
       </dd>
 
       <dt class="col-sm-3">Status</dt>
@@ -59,20 +61,17 @@
         {% endif %}
       </dd>
 
-      <dt class="col-sm-3">Conditions</dt>
+      <dt class="col-sm-3">Symbolic Conditions</dt>
       <dd class="col-sm-9">
-        <pre
-          class="bg-light p-3 rounded"
-        ><code>{{ rule.conditions|tojson(indent=2) }}</code></pre>
-      </dd>
-
-      <dt class="col-sm-3">Actions</dt>
-      <dd class="col-sm-9">
+        {% if rule.symbolic_conditions %}
         <ul class="list-group">
-          {% for action in rule.actions %}
-          <li class="list-group-item">{{ action }}</li>
+          {% for condition in rule.symbolic_conditions %}
+          <li class="list-group-item"><code>{{ condition }}</code></li>
           {% endfor %}
         </ul>
+        {% else %}
+        <span class="text-muted">No conditions defined</span>
+        {% endif %}
       </dd>
 
       <dt class="col-sm-3">Created</dt>

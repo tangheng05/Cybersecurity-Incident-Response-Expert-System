@@ -42,8 +42,6 @@ def create():
                 'symbolic_conditions': symbolic_conditions,
                 'conclusion': form.conclusion.data,
                 'cf': form.cf.data,
-                'priority': form.priority.data,
-                'severity_score': form.severity_score.data,
                 'is_active': form.is_active.data,
             }
             rule = RuleService.create(data)

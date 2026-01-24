@@ -15,10 +15,11 @@ block content %}
           ').title() }}
         </p>
         <p class="mb-1">
-          <strong>Priority:</strong> {{ rule.priority.title() }}
+          <strong>Conclusion:</strong> {{ rule.conclusion or 'N/A' }}
         </p>
         <p class="mb-0">
-          <strong>Severity:</strong> {{ rule.severity_score }}/10
+          <strong>CF:</strong> {{ "%.2f"|format(rule.cf) if rule.cf else 'N/A'
+          }}
         </p>
       </div>
     </div>

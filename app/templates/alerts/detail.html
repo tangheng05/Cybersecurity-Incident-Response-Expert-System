@@ -292,28 +292,30 @@ Details{% endblock %} {% block content %}
 
     <!-- Analysis Results Card -->
     <div class="col-md-6 mb-4">
-      {% if incident %}
+      {% if incident %} {% set cf_percent = (incident.final_cf * 100)|int if
+      incident.final_cf else 0 %}
       <div
-        class="card border-{% if incident.confidence_score >= 80 %}danger{% elif incident.confidence_score >= 60 %}warning{% else %}info{% endif %}"
+        class="card border-{% if cf_percent >= 80 %}danger{% elif cf_percent >= 60 %}warning{% else %}info{% endif %}"
       >
         <div
-          class="card-header bg-{% if incident.confidence_score >= 80 %}danger{% elif incident.confidence_score >= 60 %}warning{% else %}info{% endif %} text-white"
+          class="card-header bg-{% if cf_percent >= 80 %}danger{% elif cf_percent >= 60 %}warning{% else %}info{% endif %} text-white"
         >
           <h5><i class="bi bi-cpu"></i> Analysis Results</h5>
         </div>
         <div class="card-body">
           <div class="mb-3">
-            <h6>Confidence Score:</h6>
+            <h6>Certainty Factor (CF):</h6>
             <div class="progress" style="height: 30px">
               <div
-                class="progress-bar bg-{% if incident.confidence_score >= 80 %}danger{% elif incident.confidence_score >= 60 %}warning{% else %}info{% endif %}"
+                class="progress-bar bg-{% if cf_percent >= 80 %}danger{% elif cf_percent >= 60 %}warning{% else %}info{% endif %}"
                 role="progressbar"
-                style="width: {{ incident.confidence_score }}%"
-                aria-valuenow="{{ incident.confidence_score }}"
+                style="width: {{ cf_percent }}%"
+                aria-valuenow="{{ cf_percent }}"
                 aria-valuemin="0"
                 aria-valuemax="100"
               >
-                {{ incident.confidence_score }}%
+                {{ "%.2f"|format(incident.final_cf) if incident.final_cf else
+                '0.00' }}
               </div>
             </div>
           </div>
@@ -333,6 +335,7 @@ Details{% endblock %} {% block content %}
 
           <div class="mb-3">
             <h6>Recommended Actions:</h6>
+            {% if incident.recommended_actions %}
             <ul class="list-group">
               {% for action in incident.recommended_actions %}
               <li class="list-group-item">
@@ -341,13 +344,16 @@ Details{% endblock %} {% block content %}
               </li>
               {% endfor %}
             </ul>
+            {% else %}
+            <p class="text-muted">No recommended actions available.</p>
+            {% endif %}
           </div>
 
           <div class="mb-3">
             <h6>Matched Rules:</h6>
-            {% if incident.matched_rules %}
+            {% if incident.trace and incident.trace.fired_rules %}
             <p>
-              {{ incident.matched_rules | length }} security rule(s) matched
+              {{ incident.trace.fired_rules | length }} security rule(s) matched
             </p>
             {% else %}
             <p class="text-muted">No rules matched</p>

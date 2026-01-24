@@ -9,7 +9,7 @@ class Rule(db.Model):
     name = db.Column(db.String(200), nullable=False)
     attack_type_id = db.Column(db.Integer, db.ForeignKey('attack_types.id'), nullable=False)
     
-    # V2 Forward-Chaining Engine fields
+
     symbolic_conditions = db.Column(db.JSON, nullable=True)
     conclusion = db.Column(db.String(100), nullable=True)
     cf = db.Column(db.Float, nullable=True)
