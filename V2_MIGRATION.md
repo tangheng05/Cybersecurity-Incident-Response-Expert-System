@@ -83,22 +83,26 @@ Complete migration from heuristic-based inference engine to formal forward-chain
 
 ---
 
-### 🔄 Phase 4: Rule Conversion
+### ✅ Phase 4: Rule Conversion
 
-**Status:** ⏳ PENDING  
-**Target:** January 25, 2026
+**Status:** ✅ COMPLETED  
+**Completed:** January 24, 2026
 
 #### Tasks:
 
-- [ ] Analyze existing 11 rules
-- [ ] Define symbolic facts for Brute Force attacks
-  - [ ] Map numeric conditions to symbolic facts
-  - [ ] Define fact derivation rules
-- [ ] Define symbolic facts for DDoS attacks
-- [ ] Create v2 rule definitions with CF values
-- [ ] Seed v2 rules into database
+- [x] Analyze existing 11 rules
+- [x] Define symbolic facts for Brute Force attacks
+  - [x] Map numeric conditions to symbolic facts
+  - [x] Define fact derivation rules
+- [x] Define symbolic facts for DDoS attacks
+- [x] Create v2 rule definitions with CF values
+- [x] Seed v2 rules into database
 
 **Deliverables:**
+- `scripts/seed_rules_engine.py` (11 symbolic rules)
+- 5 Brute Force rules (CF: 0.85-0.92)
+- 5 DDoS rules (CF: 0.83-0.95)
+- 1 APT detection rule (CF: 0.78)
 
 - `scripts/convert_rules_v2.py` - Rule conversion script
 - `scripts/seed_v2_rules.py` - Seed v2 rules
@@ -320,10 +324,10 @@ If issues occur during migration:
 
 ## Progress Tracking
 
-**Current Phase:** Phase 4 - Rule Conversion  
-**Overall Progress:** ███░░░░░░░ 30%
+**Current Phase:** Phase 5 - Service Layer Updates  
+**Overall Progress:** ████░░░░░░ 40%
 
-### Completed Phases: 3 / 10
+### Completed Phases: 4 / 10
 
 ### Estimated Completion: January 30, 2026
 
@@ -345,16 +349,24 @@ If issues occur during migration:
   - Updated Incident model with conclusions, trace, final_cf
   - Maintained backward compatibility
   - Database recreated with new schema
+- ✅ Phase 4 Complete: Rule conversion
+  - Created `seed_rules_engine.py` with 11 symbolic rules
+  - All rules seeded with appropriate CF values
+  - Symbolic conditions mapped to fact_extractor thresholds
 
 ---
 
 ## Next Steps
 
-1. ✅ Create this milestone file
-2. 🔄 Implement `inference_engine_v2.py`
-3. 🔄 Implement `fact_extractor.py`
-4. ⏳ Create unit tests
-5. ⏳ Update database schema
+1. ✅ Create milestone file
+2. ✅ Implement inference_engine.py
+3. ✅ Implement fact_extractor.py
+4. ✅ Update database schema
+5. ✅ Convert rules to symbolic format
+6. 🔄 Update service layer (alert_service.py)
+7. ⏳ Update routes and forms
+8. ⏳ Update templates
+9. ⏳ Create tests
 
 ---
 

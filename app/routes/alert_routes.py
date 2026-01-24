@@ -7,7 +7,6 @@ from app.models.alert import Alert
 from app.models.incident import Incident
 from app.forms.alert_forms import AlertForm
 from app.services.alert_service import AlertService
-from app.services.inference_engine import InferenceEngine
 from app.utils.decorators import login_required, role_required
 from extensions import db
 
@@ -74,29 +73,10 @@ def create():
                 'raw_data': raw_data
             })
             
-            # Analyze alert with inference engine
-            analysis_result = InferenceEngine.analyze_alert(alert)
+            # Analyze alert and create incident
+            analysis = AlertService.analyze_and_create_incident(alert)
             
-            # Create incident from analysis
-            incident = Incident(
-                alert_id=alert.id,
-                attack_type_id=analysis_result['attack_type_id'],
-                matched_rules=analysis_result['matched_rules'],
-                recommended_actions=analysis_result['recommended_actions'],
-                confidence_score=analysis_result['confidence_score'],
-                explanation=analysis_result['explanation'],
-                status='new',
-                assigned_to=session.get('user_id')
-            )
-            
-            db.session.add(incident)
-            
-            # Update alert status
-            alert.status = 'processed'
-            
-            db.session.commit()
-            
-            flash(f'Alert analyzed successfully! Confidence: {analysis_result["confidence_score"]}%', 'success')
+            flash(f'Alert analyzed! {analysis["top_conclusion"] or "No conclusion"} (CF: {analysis["final_cf"]:.2f})', 'success')
             return redirect(url_for('alerts.detail', alert_id=alert.id))
             
         except Exception as e:
@@ -116,35 +96,15 @@ def analyze(alert_id: int):
         return redirect(url_for('alerts.index'))
     
     try:
-        # Re-analyze
-        analysis_result = InferenceEngine.analyze_alert(alert)
-        
-        # Update or create incident
         incident = Incident.query.filter_by(alert_id=alert_id).first()
         
         if incident:
-            incident.matched_rules = analysis_result['matched_rules']
-            incident.recommended_actions = analysis_result['recommended_actions']
-            incident.confidence_score = analysis_result['confidence_score']
-            incident.explanation = analysis_result['explanation']
-            incident.attack_type_id = analysis_result['attack_type_id']
-        else:
-            incident = Incident(
-                alert_id=alert.id,
-                attack_type_id=analysis_result['attack_type_id'],
-                matched_rules=analysis_result['matched_rules'],
-                recommended_actions=analysis_result['recommended_actions'],
-                confidence_score=analysis_result['confidence_score'],
-                explanation=analysis_result['explanation'],
-                status='new',
-                assigned_to=session.get('user_id')
-            )
-            db.session.add(incident)
+            db.session.delete(incident)
+            db.session.commit()
         
-        alert.status = 'processed'
-        db.session.commit()
+        analysis = AlertService.analyze_and_create_incident(alert)
         
-        flash('Alert re-analyzed successfully!', 'success')
+        flash(f'Re-analyzed! {analysis["top_conclusion"] or "No conclusion"} (CF: {analysis["final_cf"]:.2f})', 'success')
         
     except Exception as e:
         db.session.rollback()

@@ -1,8 +1,9 @@
 """
 Alert Service - Business logic for alert management
 """
-from typing import List, Optional
+from typing import List, Optional, Dict
 from app.models.alert import Alert
+from app.models.incident import Incident
 from extensions import db
 from datetime import datetime
 
@@ -58,6 +59,71 @@ class AlertService:
         return alert
     
     @staticmethod
+    def analyze_and_create_incident(alert: Alert) -> Dict:
+        """
+        Analyze alert using forward-chaining inference engine
+        and create incident record
+        
+        Args:
+            alert: Alert object to analyze
+            
+        Returns:
+            Dict with analysis results and incident
+        """
+        from app.services.inference_engine import InferenceEngine
+        from app.services.fact_extractor import FactExtractor
+        from app.models.attack_type import AttackType
+        
+        facts = FactExtractor.extract_facts(alert)
+        result = InferenceEngine.infer(facts)
+        
+        top_conclusion = None
+        top_cf = 0.0
+        attack_type_id = None
+        
+        if result.conclusions:
+            top_conclusion = result.conclusions[0]
+            top_cf = top_conclusion.cf
+            
+            conclusion_to_attack = {
+                'brute_force_attack': 'brute_force',
+                'credential_stuffing': 'brute_force',
+                'ddos_attack': 'ddos',
+                'apt_attack': 'unauthorized_access'
+            }
+            
+            attack_name = conclusion_to_attack.get(top_conclusion.conclusion)
+            if attack_name:
+                attack_type = AttackType.query.filter_by(name=attack_name).first()
+                if attack_type:
+                    attack_type_id = attack_type.id
+        
+        explanation = InferenceEngine.explain(result, facts)
+        
+        incident = Incident(
+            alert_id=alert.id,
+            attack_type_id=attack_type_id,
+            conclusions=[c.__dict__ for c in result.conclusions],
+            trace=[t.__dict__ for t in result.trace],
+            final_cf=top_cf,
+            explanation=explanation,
+            status='new'
+        )
+        
+        db.session.add(incident)
+        alert.status = 'processed'
+        db.session.commit()
+        
+        return {
+            'incident': incident,
+            'top_conclusion': top_conclusion.conclusion if top_conclusion else None,
+            'final_cf': top_cf,
+            'explanation': explanation,
+            'facts': facts,
+            'trace': result.trace
+        }
+    
+    @staticmethod
     def update_status(alert: Alert, status: str) -> Alert:
         """Update alert status"""
         alert.status = status
@@ -69,3 +135,4 @@ class AlertService:
         """Delete alert"""
         db.session.delete(alert)
         db.session.commit()
+
