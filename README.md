@@ -4,10 +4,7 @@
 ![Flask](https://img.shields.io/badge/flask-2.3.3-green.svg)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 
-
 > An automated incident response expert system that analyzes security alerts using if-then rules and provides actionable recommendations for handling Brute Force and DDoS attacks.
-
-
 
 ## 📋 Table of Contents
 
@@ -186,13 +183,14 @@ pytest --cov=app --cov-report=html
 
 ### ✅ Milestone 3 - Inference Engine
 
-- Core reasoning engine
-- Pattern matching (70% threshold)
-- Confidence scoring (0-100)
-- Action prioritization
-- Explanation generation
+- Forward-chaining reasoning engine
+- Symbolic fact extraction from alerts
+- Certainty Factor (CF) combination formula
+- All-or-nothing rule matching
+- Trace recording (fired + skipped rules)
+- Explanation generation (why/why not)
 - Alert management interface
-- Automatic incident creation
+- Automatic incident creation with CF scores
 
 ### ✅ Milestone 4 - Dashboard & Incident Management
 
@@ -312,8 +310,10 @@ id, name, description, severity_level, is_active
 ### rules
 
 ```sql
-id, name, attack_type_id, conditions (JSON),
-actions (JSON), priority, severity_score, is_active
+id, name, attack_type_id,
+symbolic_conditions (JSON), conclusion, cf (Float),
+conditions (JSON), actions (JSON),
+priority, severity_score, is_active
 ```
 
 ### alerts
@@ -325,18 +325,21 @@ severity, raw_data (JSON), status, created_at
 
 ### incidents
 
-```sql
+conclusions (JSON), trace (JSON), final_cf (Float),
+matched_rules (JSON), recommended_actions (JSON),
+
 id, alert_id, attack_type_id, matched_rules (JSON),
 recommended_actions (JSON), confidence_score, explanation,
 status, assigned_to, created_at, updated_at, resolved_at
-```
+
+````
 
 ### incident_history
 
 ```sql
 id, incident_id, action_taken, notes,
 performed_by, timestamp
-```
+````
 
 </details>
 
@@ -351,25 +354,35 @@ performed_by, timestamp
 
 ## 🎯 Inference Engine
 
-The heart of the system. Analyzes alerts using:
+The heart of the system using **Forward-Chaining with Certainty Factors (CF)**:
 
-| Component                  | Description                                 |
-| -------------------------- | ------------------------------------------- |
-| **Pattern Matching**       | 70% condition threshold for rule activation |
-| **Confidence Scoring**     | Multi-factor algorithm (0-100)              |
-| **Action Prioritization**  | High → Medium → Low                         |
-| **Explanation Generation** | Human-readable analysis                     |
+| Component                | Description                                 |
+| ------------------------ | ------------------------------------------- |
+| **Symbolic Facts**       | Alert data converted to symbolic predicates |
+| **All-or-Nothing Match** | Rules fire only when all conditions are met |
+| **CF Combination**       | CF_new = CF_old + CF_rule × (1 - CF_old)    |
+| **Trace Recording**      | Captures all fired and skipped rules        |
+| **Explainability**       | "Why" and "Why Not" explanations            |
 
-### Confidence Score Calculation
+### Certainty Factor Formula
 
 ```
-Base confidence:    40 points
-Match score:        up to 30 points
-Priority bonus:     up to 20 points
-Severity factor:    up to 10 points
-─────────────────────────────────
-Total:              0-100 points
+When a rule fires:
+  CF_new = CF_old + CF_rule × (1 - CF_old)
+
+Example:
+  Rule 1 fires with CF=0.85: Result CF = 0.85
+  Rule 2 fires with CF=0.80: Result CF = 0.85 + 0.80 × (1-0.85) = 0.97
 ```
+
+### Symbolic Fact Extraction
+
+Alerts are converted to symbolic facts based on thresholds:
+
+- `high_failed_attempts` (≥5), `very_high_failed_attempts` (≥10)
+- `short_timespan` (≤300s), `very_short_timespan` (≤120s)
+- `high_traffic_rate` (≥100 rps), `extreme_traffic_rate` (≥1000 rps)
+- Service types: `ssh_service`, `admin_target`, `external_source`
 
 ## 📝 Sample Usage
 
@@ -535,7 +548,6 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-
 ## 🙏 Acknowledgments
 
 - Flask community for excellent documentation
@@ -546,11 +558,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 <div align="center">
 
-
-**Version:** 1.0.0  
-**Last Updated:** January 10, 2026
-
-
+**Version:** 2.0.0  
+**Last Updated:** January 24, 2026
 
 [⬆ Back to Top](#cybersecurity-incident-response-expert-system)
 

@@ -1,13 +1,16 @@
-{% extends "layouts/base.html" %}
-
-{% block title %}Incident #{{ incident.id }}{% endblock %}
-
-{% block content %}
+{% extends "layouts/base.html" %} {% block title %}Incident #{{ incident.id }}{%
+endblock %} {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
   <h1 class="h3">🎯 Incident #{{ incident.id }}</h1>
   <div>
-    <a href="{{ url_for('incidents.index') }}" class="btn btn-outline-secondary">← Back to Incidents</a>
-    <a href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}" class="btn btn-outline-primary">View Alert #{{ incident.alert_id }}</a>
+    <a href="{{ url_for('incidents.index') }}" class="btn btn-outline-secondary"
+      >← Back to Incidents</a
+    >
+    <a
+      href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}"
+      class="btn btn-outline-primary"
+      >View Alert #{{ incident.alert_id }}</a
+    >
   </div>
 </div>
 
@@ -26,33 +29,42 @@
 
           <dt class="col-sm-4">Alert ID:</dt>
           <dd class="col-sm-8">
-            <a href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}">#{{ incident.alert_id }}</a>
+            <a href="{{ url_for('alerts.detail', alert_id=incident.alert_id) }}"
+              >#{{ incident.alert_id }}</a
+            >
           </dd>
 
           <dt class="col-sm-4">Attack Type:</dt>
           <dd class="col-sm-8">
             {% if attack_type %}
             <span class="badge bg-danger">{{ attack_type.name }}</span>
-            <span class="text-muted">(Severity: {{ attack_type.severity_level }}/10)</span>
+            <span class="text-muted"
+              >(Severity: {{ attack_type.severity_level }}/10)</span
+            >
             {% else %}
             <span class="badge bg-secondary">Unknown</span>
             {% endif %}
           </dd>
 
-          <dt class="col-sm-4">Confidence Score:</dt>
+          <dt class="col-sm-4">Certainty Factor:</dt>
           <dd class="col-sm-8">
             <div class="d-flex align-items-center gap-2">
-              <div class="progress flex-grow-1" style="height: 25px;">
-                <div class="progress-bar 
-                  {% if incident.confidence_score >= 80 %}bg-success
-                  {% elif incident.confidence_score >= 50 %}bg-warning text-dark
-                  {% else %}bg-danger{% endif %}" 
-                     role="progressbar" 
-                     style="width: {{ incident.confidence_score }}%"
-                     aria-valuenow="{{ incident.confidence_score }}" 
-                     aria-valuemin="0" 
-                     aria-valuemax="100">
-                  <strong>{{ incident.confidence_score }}%</strong>
+              <div class="progress flex-grow-1" style="height: 25px">
+                {% set cf_percent = (incident.final_cf * 100)|int if
+                incident.final_cf else (incident.confidence_score or 0) %}
+                <div
+                  class="progress-bar {% if cf_percent >= 80 %}bg-success {% elif cf_percent >= 50 %}bg-warning text-dark {% else %}bg-danger{% endif %}"
+                  role="progressbar"
+                  style="width: {{ cf_percent }}%"
+                  aria-valuenow="{{ cf_percent }}"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  <strong
+                    >{{ "%.2f"|format(incident.final_cf) if incident.final_cf
+                    else incident.confidence_score }}{% if not incident.final_cf
+                    %}%{% endif %}</strong
+                  >
                 </div>
               </div>
             </div>
@@ -74,21 +86,29 @@
           <dt class="col-sm-4">Assigned To:</dt>
           <dd class="col-sm-8">
             {% if incident.assigned_user %}
-            <span class="badge bg-info">{{ incident.assigned_user.username }}</span>
+            <span class="badge bg-info"
+              >{{ incident.assigned_user.username }}</span
+            >
             {% else %}
             <span class="text-muted">Unassigned</span>
             {% endif %}
           </dd>
 
           <dt class="col-sm-4">Created:</dt>
-          <dd class="col-sm-8">{{ incident.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</dd>
+          <dd class="col-sm-8">
+            {{ incident.created_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}
+          </dd>
 
           <dt class="col-sm-4">Last Updated:</dt>
-          <dd class="col-sm-8">{{ incident.updated_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</dd>
+          <dd class="col-sm-8">
+            {{ incident.updated_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}
+          </dd>
 
           {% if incident.resolved_at %}
           <dt class="col-sm-4">Resolved:</dt>
-          <dd class="col-sm-8">{{ incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}</dd>
+          <dd class="col-sm-8">
+            {{ incident.resolved_at.strftime('%Y-%m-%d %H:%M:%S UTC') }}
+          </dd>
           {% endif %}
         </dl>
       </div>
@@ -100,7 +120,9 @@
         <h5 class="mb-0">🔍 Analysis Explanation</h5>
       </div>
       <div class="card-body">
-        <p class="mb-0">{{ incident.explanation or 'No explanation available.' }}</p>
+        <p class="mb-0">
+          {{ incident.explanation or 'No explanation available.' }}
+        </p>
       </div>
     </div>
 
@@ -127,7 +149,9 @@
                 {% else %}
                 <span class="badge bg-info">Low Priority</span>
                 {% endif %}
-                <span class="badge bg-secondary">Severity: {{ rule.severity_score }}/10</span>
+                <span class="badge bg-secondary"
+                  >Severity: {{ rule.severity_score }}/10</span
+                >
               </div>
             </div>
           </div>
@@ -174,8 +198,9 @@
                 <p class="mb-1 text-muted">{{ entry.notes }}</p>
                 {% endif %}
                 <small class="text-muted">
-                  By: {% if entry.user %}{{ entry.user.username }}{% else %}System{% endif %} | 
-                  {{ entry.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}
+                  By: {% if entry.user %}{{ entry.user.username }}{% else
+                  %}System{% endif %} | {{ entry.timestamp.strftime('%Y-%m-%d
+                  %H:%M:%S') }}
                 </small>
               </div>
             </div>
@@ -199,38 +224,99 @@
       </div>
       <div class="card-body">
         <!-- Update Status -->
-        <form method="POST" action="{{ url_for('incidents.update_status', incident_id=incident.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          
+        <form
+          method="POST"
+          action="{{ url_for('incidents.update_status', incident_id=incident.id) }}"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
           <div class="mb-3">
             <label for="status" class="form-label">Update Status:</label>
             <select name="status" id="status" class="form-select" required>
-              <option value="new" {% if incident.status == 'new' %}selected{% endif %}>New</option>
-              <option value="analyzing" {% if incident.status == 'analyzing' %}selected{% endif %}>Analyzing</option>
-              <option value="pending" {% if incident.status == 'pending' %}selected{% endif %}>Pending</option>
-              <option value="resolved" {% if incident.status == 'resolved' %}selected{% endif %}>Resolved</option>
+              <option
+                value="new"
+                {%
+                if
+                incident.status=""
+                ="new"
+                %}selected{%
+                endif
+                %}
+              >
+                New
+              </option>
+              <option
+                value="analyzing"
+                {%
+                if
+                incident.status=""
+                ="analyzing"
+                %}selected{%
+                endif
+                %}
+              >
+                Analyzing
+              </option>
+              <option
+                value="pending"
+                {%
+                if
+                incident.status=""
+                ="pending"
+                %}selected{%
+                endif
+                %}
+              >
+                Pending
+              </option>
+              <option
+                value="resolved"
+                {%
+                if
+                incident.status=""
+                ="resolved"
+                %}selected{%
+                endif
+                %}
+              >
+                Resolved
+              </option>
             </select>
           </div>
 
           <div class="mb-3">
             <label for="notes" class="form-label">Notes (Optional):</label>
-            <textarea name="notes" id="notes" class="form-control" rows="2"></textarea>
+            <textarea
+              name="notes"
+              id="notes"
+              class="form-control"
+              rows="2"
+            ></textarea>
           </div>
 
-          <button type="submit" class="btn btn-primary w-100">Update Status</button>
+          <button type="submit" class="btn btn-primary w-100">
+            Update Status
+          </button>
         </form>
 
-        <hr>
+        <hr />
 
         <!-- Assignment -->
-        <form method="POST" action="{{ url_for('incidents.assign', incident_id=incident.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          
+        <form
+          method="POST"
+          action="{{ url_for('incidents.assign', incident_id=incident.id) }}"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
           {% if incident.assigned_to == session.user_id %}
-          <button type="submit" class="btn btn-outline-secondary w-100">Unassign from Me</button>
+          <button type="submit" class="btn btn-outline-secondary w-100">
+            Unassign from Me
+          </button>
           {% else %}
-          <input type="hidden" name="assign_to_me" value="1"/>
-          <button type="submit" class="btn btn-outline-info w-100">Assign to Me</button>
+          <input type="hidden" name="assign_to_me" value="1" />
+          <button type="submit" class="btn btn-outline-info w-100">
+            Assign to Me
+          </button>
           {% endif %}
         </form>
       </div>
@@ -242,22 +328,38 @@
         <h5 class="mb-0">✅ Record Action</h5>
       </div>
       <div class="card-body">
-        <form method="POST" action="{{ url_for('incidents.add_action', incident_id=incident.id) }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-          
+        <form
+          method="POST"
+          action="{{ url_for('incidents.add_action', incident_id=incident.id) }}"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
           <div class="mb-3">
             <label for="action_taken" class="form-label">Action Taken:</label>
-            <input type="text" name="action_taken" id="action_taken" 
-                   class="form-control" placeholder="e.g., Blocked IP address" required>
+            <input
+              type="text"
+              name="action_taken"
+              id="action_taken"
+              class="form-control"
+              placeholder="e.g., Blocked IP address"
+              required
+            />
           </div>
 
           <div class="mb-3">
             <label for="action_notes" class="form-label">Details:</label>
-            <textarea name="notes" id="action_notes" class="form-control" rows="3" 
-                      placeholder="Additional details about the action..."></textarea>
+            <textarea
+              name="notes"
+              id="action_notes"
+              class="form-control"
+              rows="3"
+              placeholder="Additional details about the action..."
+            ></textarea>
           </div>
 
-          <button type="submit" class="btn btn-success w-100">Save Action</button>
+          <button type="submit" class="btn btn-success w-100">
+            Save Action
+          </button>
         </form>
       </div>
     </div>
@@ -294,9 +396,14 @@
           </dd>
 
           <dt class="col-6">Timestamp:</dt>
-          <dd class="col-6">{{ alert.timestamp.strftime('%Y-%m-%d %H:%M') }}</dd>
+          <dd class="col-6">
+            {{ alert.timestamp.strftime('%Y-%m-%d %H:%M') }}
+          </dd>
         </dl>
-        <a href="{{ url_for('alerts.detail', alert_id=alert.id) }}" class="btn btn-sm btn-outline-primary w-100 mt-2">
+        <a
+          href="{{ url_for('alerts.detail', alert_id=alert.id) }}"
+          class="btn btn-sm btn-outline-primary w-100 mt-2"
+        >
           View Full Alert →
         </a>
         {% else %}
